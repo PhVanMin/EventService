@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+  eventservice.api:
+    image: ${DOCKER_REGISTRY-}eventserviceapi
+    build:
+      context: .
+      dockerfile: EventService.API/Dockerfile
+
+volumes:
+  eventdb:
