@@ -1,12 +1,13 @@
 ﻿using EventService.Domain.AggregatesModel.BrandAggregate;
 using EventService.Domain.AggregatesModel.EventAggregate;
 using EventService.Domain.AggregatesModel.VoucherAggregate;
+using EventService.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace EventService.Infrastructure;
 
-public class EventContext : DbContext {
+public class EventContext : DbContext, IUnitOfWork {
     public EventContext() {
     }
 

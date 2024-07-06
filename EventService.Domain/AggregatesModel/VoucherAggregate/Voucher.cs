@@ -1,11 +1,9 @@
 ﻿using EventService.Domain.AggregatesModel.EventAggregate;
 using EventService.Domain.Interfaces;
+using EventService.Domain.SeedWork;
 
 namespace EventService.Domain.AggregatesModel.VoucherAggregate;
-public class Voucher : IAggregateRoot
-{
-    public long Id { get; set; }
-
+public class Voucher : Entity, IAggregateRoot {
     public string Code { get; set; } = null!;
 
     public string Image { get; set; } = null!;

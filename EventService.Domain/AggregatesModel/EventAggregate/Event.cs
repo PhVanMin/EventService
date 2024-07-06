@@ -1,13 +1,11 @@
 ﻿using EventService.Domain.AggregatesModel.BrandAggregate;
 using EventService.Domain.AggregatesModel.VoucherAggregate;
 using EventService.Domain.Interfaces;
+using EventService.Domain.SeedWork;
 
 namespace EventService.Domain.AggregatesModel.EventAggregate;
 
-public class Event : IAggregateRoot
-{
-    public long Id { get; set; }
-
+public class Event : Entity, IAggregateRoot {
     public string Name { get; set; } = null!;
 
     public string Image { get; set; } = null!;
