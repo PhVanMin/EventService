@@ -1,7 +1,6 @@
-﻿namespace EventService.API.DTOs;
-public record BrandDTO
+﻿namespace EventService.API.DTOs.Brand;
+public record CreateBrandRequest
 (
-    long Id,
     string Name,
     string Field,
     string Address,

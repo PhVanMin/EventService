@@ -1,12 +1,11 @@
-﻿namespace EventService.API.DTOs;
-public record VoucherDTO
+﻿namespace EventService.API.DTOs.Voucher;
+public record CreateVoucherRequest
 (
-    long Id,
     string Code,
     string Image,
     long Value,
     string Description,
-    DateOnly ExpireDate,
+    DateTime ExpireDate,
     short Status,
     long EventId
 );

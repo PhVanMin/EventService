@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventService.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initialCreate : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -47,7 +47,7 @@ namespace EventService.Infrastructure.Migrations
                 {
                     table.PrimaryKey("event_pkey", x => x.id);
                     table.ForeignKey(
-                        name: "event_brand_id_fkey",
+                        name: "FK_event_brand_brand_id",
                         column: x => x.brand_id,
                         principalTable: "brand",
                         principalColumn: "id",
@@ -72,7 +72,7 @@ namespace EventService.Infrastructure.Migrations
                 {
                     table.PrimaryKey("voucher_pkey", x => x.id);
                     table.ForeignKey(
-                        name: "voucher_event_id_fkey",
+                        name: "FK_voucher_event_event_id",
                         column: x => x.event_id,
                         principalTable: "event",
                         principalColumn: "id",

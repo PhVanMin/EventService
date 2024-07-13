@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventService.Infrastructure.Migrations
 {
     [DbContext(typeof(EventContext))]
-    [Migration("20240706084211_initialCreate")]
-    partial class initialCreate
+    [Migration("20240713062805_update-time")]
+    partial class updatetime
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace EventService.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("EventService.Domain.Entities.Brand", b =>
+            modelBuilder.Entity("EventService.Domain.Model.Brand", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,7 +62,7 @@ namespace EventService.Infrastructure.Migrations
                     b.ToTable("brand", (string)null);
                 });
 
-            modelBuilder.Entity("EventService.Domain.Entities.Event", b =>
+            modelBuilder.Entity("EventService.Domain.Model.Event", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -75,8 +75,8 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("brand_id");
 
-                    b.Property<DateOnly>("EndDate")
-                        .HasColumnType("date")
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_date");
 
                     b.Property<long?>("GameId")
@@ -97,8 +97,8 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("no_voucher");
 
-                    b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date")
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_date");
 
                     b.HasKey("Id")
@@ -109,7 +109,7 @@ namespace EventService.Infrastructure.Migrations
                     b.ToTable("event", (string)null);
                 });
 
-            modelBuilder.Entity("EventService.Domain.Entities.Voucher", b =>
+            modelBuilder.Entity("EventService.Domain.Model.Voucher", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -132,8 +132,8 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("event_id");
 
-                    b.Property<DateOnly>("ExpireDate")
-                        .HasColumnType("date")
+                    b.Property<DateTime>("ExpireDate")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("expire_date");
 
                     b.Property<string>("Image")
@@ -157,36 +157,34 @@ namespace EventService.Infrastructure.Migrations
                     b.ToTable("voucher", (string)null);
                 });
 
-            modelBuilder.Entity("EventService.Domain.Entities.Event", b =>
+            modelBuilder.Entity("EventService.Domain.Model.Event", b =>
                 {
-                    b.HasOne("EventService.Domain.Entities.Brand", "Brand")
+                    b.HasOne("EventService.Domain.Model.Brand", "Brand")
                         .WithMany("Events")
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("event_brand_id_fkey");
+                        .IsRequired();
 
                     b.Navigation("Brand");
                 });
 
-            modelBuilder.Entity("EventService.Domain.Entities.Voucher", b =>
+            modelBuilder.Entity("EventService.Domain.Model.Voucher", b =>
                 {
-                    b.HasOne("EventService.Domain.Entities.Event", "Event")
+                    b.HasOne("EventService.Domain.Model.Event", "Event")
                         .WithMany("Vouchers")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("voucher_event_id_fkey");
+                        .IsRequired();
 
                     b.Navigation("Event");
                 });
 
-            modelBuilder.Entity("EventService.Domain.Entities.Brand", b =>
+            modelBuilder.Entity("EventService.Domain.Model.Brand", b =>
                 {
                     b.Navigation("Events");
                 });
 
-            modelBuilder.Entity("EventService.Domain.Entities.Event", b =>
+            modelBuilder.Entity("EventService.Domain.Model.Event", b =>
                 {
                     b.Navigation("Vouchers");
                 });

@@ -1,10 +1,10 @@
-﻿using EventService.Domain.AggregatesModel.BrandAggregate;
+﻿using EventService.API.DTOs.Brand;
+using EventService.Domain.Model;
 using EventService.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventService.Controllers
-{
+namespace EventService.API.Controllers {
     [Route("api/[controller]")]
     [ApiController]
     public class BrandsController : ControllerBase {
@@ -17,7 +17,7 @@ namespace EventService.Controllers
         // GET: api/Brands
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Brand>>> GetBrands() {
-            return await _context.Brands.ToListAsync();
+            return await _context.Brands.Include(b => b.Events).ToListAsync();
         }
 
         // GET: api/Brands/5
@@ -58,25 +58,17 @@ namespace EventService.Controllers
         // POST: api/Brands
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Brand>> PostBrand(BrandDTO brandDTO) {
+        public async Task<ActionResult<Brand>> PostBrand(CreateBrandRequest request) {
             var brand = new Brand() {
-                Name = brandDTO.Name,
-                Field = brandDTO.Field,
-                Address = brandDTO.Address,
-                Status = brandDTO.Status,
-                Gps = brandDTO.Gps
+                Address = request.Address,
+                Name = request.Name,
+                Status = request.Status,
+                Field = request.Field,
+                Gps = request.Gps
             };
 
             _context.Brands.Add(brand);
-            try {
-                await _context.SaveChangesAsync();
-            } catch (DbUpdateException) {
-                if (BrandExists(brand.Id)) {
-                    return Conflict();
-                } else {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetBrand", new { id = brand.Id }, brand);
         }

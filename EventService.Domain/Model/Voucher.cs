@@ -1,8 +1,8 @@
-﻿using EventService.Domain.AggregatesModel.EventAggregate;
-using EventService.Domain.Interfaces;
+﻿using EventService.Domain.Interfaces;
 using EventService.Domain.SeedWork;
+using System.Text.Json.Serialization;
 
-namespace EventService.Domain.AggregatesModel.VoucherAggregate;
+namespace EventService.Domain.Model;
 public class Voucher : Entity, IAggregateRoot {
     public string Code { get; set; } = null!;
 
@@ -12,11 +12,12 @@ public class Voucher : Entity, IAggregateRoot {
 
     public string Description { get; set; } = null!;
 
-    public DateOnly ExpireDate { get; set; }
+    public DateTime ExpireDate { get; set; }
 
     public short Status { get; set; }
 
     public long EventId { get; set; }
 
-    public virtual Event Event { get; set; } = null!;
+    [JsonIgnore]
+    public Event Event { get; set; } = null!;
 }

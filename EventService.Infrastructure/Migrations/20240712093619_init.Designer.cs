@@ -3,6 +3,7 @@ using System;
 using EventService.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventService.Infrastructure.Migrations
 {
     [DbContext(typeof(EventContext))]
-    partial class EventContextModelSnapshot : ModelSnapshot
+    [Migration("20240712093619_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,8 +75,8 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("brand_id");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date")
                         .HasColumnName("end_date");
 
                     b.Property<long?>("GameId")
@@ -94,8 +97,8 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("no_voucher");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
                         .HasColumnName("start_date");
 
                     b.HasKey("Id")
@@ -129,8 +132,8 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("event_id");
 
-                    b.Property<DateTime>("ExpireDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("ExpireDate")
+                        .HasColumnType("date")
                         .HasColumnName("expire_date");
 
                     b.Property<string>("Image")
