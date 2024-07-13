@@ -6,6 +6,7 @@ namespace EventService.Infrastructure.EntityConfigurations {
     public class VoucherEntityTypeConfiguration : IEntityTypeConfiguration<Voucher> {
         public void Configure(EntityTypeBuilder<Voucher> builder) {
             builder.ToTable("voucher");
+            builder.Ignore(e => e.DomainEvents);
             builder.HasKey(e => e.Id).HasName("voucher_pkey");
 
             builder.Property(e => e.Id)
@@ -21,8 +22,7 @@ namespace EventService.Infrastructure.EntityConfigurations {
 
             builder.HasOne(e => e.Event)
                     .WithMany(e => e.Vouchers)
-                    .HasForeignKey(e => e.EventId)
-                    .IsRequired();
+                    .HasForeignKey(e => e.EventId);
         }
     }
 }

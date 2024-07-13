@@ -28,4 +28,8 @@
     <ProjectReference Include="..\EventService.Infrastructure\EventService.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Application\DomainEventHandlers\" />
+  </ItemGroup>
+
 </Project>

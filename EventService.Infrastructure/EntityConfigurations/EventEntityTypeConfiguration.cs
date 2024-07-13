@@ -7,6 +7,7 @@ namespace EventService.Infrastructure.EntityConfigurations
     public class EventEntityTypeConfiguration : IEntityTypeConfiguration<Event> {
         public void Configure(EntityTypeBuilder<Event> builder) {
             builder.ToTable("event");
+            builder.Ignore(e => e.DomainEvents);
             builder.HasKey(e => e.Id).HasName("event_pkey");
 
             builder.Property(e => e.Id)
@@ -23,8 +24,7 @@ namespace EventService.Infrastructure.EntityConfigurations
 
             builder.HasOne(e => e.Brand)
                 .WithMany(e => e.Events)
-                .HasForeignKey(e => e.BrandId)
-                .IsRequired();
+                .HasForeignKey(e => e.BrandId);
         }
     }
 }

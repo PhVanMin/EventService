@@ -9,18 +9,23 @@ public class Event : Entity, IAggregateRoot {
 
     public string Image { get; set; } = null!;
 
-    public long NoVoucher { get; set; }
+    public int NoVoucher { get; set; }
 
     public DateTime StartDate { get; set; }
 
     public DateTime EndDate { get; set; }
 
-    public long BrandId { get; set; }
+    public int BrandId { get; set; }
 
-    public long? GameId { get; set; }
+    public int? GameId { get; set; }
 
     [JsonIgnore]
     public Brand Brand { get; set; } = null!;
 
-    public ICollection<Voucher> Vouchers { get; set; } = new List<Voucher>();
+    private List<Voucher> _vouchers;
+    public IReadOnlyCollection<Voucher> Vouchers => _vouchers.AsReadOnly();
+
+    public Event() {
+        _vouchers = new List<Voucher>();
+    }
 }

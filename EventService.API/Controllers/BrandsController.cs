@@ -1,6 +1,8 @@
-﻿using EventService.API.DTOs.Brand;
+﻿using EventService.API.Application.Commands.BrandCommands;
+using EventService.API.DTOs.Brand;
 using EventService.Domain.Model;
 using EventService.Infrastructure;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,9 +11,13 @@ namespace EventService.API.Controllers {
     [ApiController]
     public class BrandsController : ControllerBase {
         private readonly EventContext _context;
+        private readonly ILogger<BrandsController> _logger;
+        private readonly IMediator _mediator;
 
-        public BrandsController(EventContext context) {
+        public BrandsController(EventContext context, ILogger<BrandsController> logger, IMediator mediator) {
             _context = context;
+            _logger = logger;
+            _mediator = mediator;
         }
 
         // GET: api/Brands
@@ -59,18 +65,40 @@ namespace EventService.API.Controllers {
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Brand>> PostBrand(CreateBrandRequest request) {
-            var brand = new Brand() {
-                Address = request.Address,
-                Name = request.Name,
-                Status = request.Status,
-                Field = request.Field,
-                Gps = request.Gps
-            };
+            _logger.LogInformation(
+                "Sending command: {CommandName} - {NameProperty}: {CommandName}",
+                request.GetType().Name,
+                nameof(request.Name),
+                request.Name
+            );
 
-            _context.Brands.Add(brand);
-            await _context.SaveChangesAsync();
+            using (_logger.BeginScope(new List<KeyValuePair<string, object>> { new("CreateBrandCommand", "command") })) {
+                var createBrandCommand = new CreateBrandCommand(
+                    request.Name, 
+                    request.Field, 
+                    request.Address, 
+                    request.Gps, 
+                    request.Status
+                );
 
-            return CreatedAtAction("GetBrand", new { id = brand.Id }, brand);
+                _logger.LogInformation(
+                    "Sending command: {CommandName} - {NameProperty}: {CommandName} ({@Command})",
+                    createBrandCommand.GetType().Name,
+                    nameof(createBrandCommand.Name),
+                    createBrandCommand.Name,
+                    createBrandCommand
+                );
+
+                var result = await _mediator.Send(createBrandCommand);
+
+                if (result) {
+                    _logger.LogInformation("CreateOrderCommand succeeded");
+                    return Ok();
+                } else {
+                    _logger.LogWarning("CreateOrderCommand failed");
+                    return BadRequest();
+                }
+            }
         }
 
         // DELETE: api/Brands/5

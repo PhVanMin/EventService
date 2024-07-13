@@ -1,7 +1,16 @@
+using EventService.API.Application.Behaviors;
 using EventService.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssemblyContaining(typeof(Program));
+    cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+    //cfg.AddOpenBehavior(typeof(ValidatorBehavior<,>));
+    //cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -10,6 +19,9 @@ builder.Services.AddDbContext<EventContext>(
 ));
 
 builder.Services.AddSwaggerGen();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 var app = builder.Build();
 

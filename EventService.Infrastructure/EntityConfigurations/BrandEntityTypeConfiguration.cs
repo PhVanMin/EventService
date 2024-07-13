@@ -6,6 +6,7 @@ namespace EventService.Infrastructure.EntityConfigurations {
     public class BrandEntityTypeConfiguration : IEntityTypeConfiguration<Brand> {
         public void Configure(EntityTypeBuilder<Brand> builder) {
             builder.ToTable("brand");
+            builder.Ignore(e => e.DomainEvents);
             builder.HasKey(e => e.Id).HasName("brand_pkey");
 
             builder.Property(e => e.Id)

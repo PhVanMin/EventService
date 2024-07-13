@@ -8,15 +8,15 @@ public class Voucher : Entity, IAggregateRoot {
 
     public string Image { get; set; } = null!;
 
-    public long Value { get; set; }
+    public int Value { get; set; }
 
     public string Description { get; set; } = null!;
 
     public DateTime ExpireDate { get; set; }
 
-    public short Status { get; set; }
+    public int Status { get; set; }
 
-    public long EventId { get; set; }
+    public int EventId { get; set; }
 
     [JsonIgnore]
     public Event Event { get; set; } = null!;
