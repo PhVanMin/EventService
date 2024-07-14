@@ -3,6 +3,7 @@ using System;
 using EventService.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventService.Infrastructure.Migrations
 {
     [DbContext(typeof(EventContext))]
-    partial class EventContextModelSnapshot : ModelSnapshot
+    [Migration("20240714155656_update_id_type")]
+    partial class update_id_type
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,24 +155,6 @@ namespace EventService.Infrastructure.Migrations
                     b.HasIndex("EventId");
 
                     b.ToTable("voucher", (string)null);
-                });
-
-            modelBuilder.Entity("EventService.Infrastructure.Idempotency.ClientRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("requests", (string)null);
                 });
 
             modelBuilder.Entity("EventService.Domain.Model.Event", b =>

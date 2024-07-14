@@ -26,7 +26,7 @@ public class Brand : Entity, IAggregateRoot {
         var @event = _events.FirstOrDefault(e => e.Name == name);
 
         if (@event != null) {
-            throw new AddEventException("$Event with name \"{ name }\" already exists.");
+            throw new EventDomainException("$Event with name \"{ name }\" already exists.");
         }
 
         @event = new Event() {

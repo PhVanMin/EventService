@@ -1,4 +1,5 @@
-﻿using EventService.API.Application.Commands.BrandCommands;
+﻿using EventService.API.Application.Commands;
+using EventService.API.Application.Commands.BrandCommands;
 using EventService.API.DTOs.Brand;
 using EventService.Domain.Model;
 using EventService.Infrastructure;
@@ -28,7 +29,7 @@ namespace EventService.API.Controllers {
 
         // GET: api/Brands/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Brand>> GetBrand(long id) {
+        public async Task<ActionResult<Brand>> GetBrand(int id) {
             var brand = await _context.Brands.FindAsync(id);
 
             if (brand == null) {
@@ -41,7 +42,7 @@ namespace EventService.API.Controllers {
         // PUT: api/Brands/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBrand(long id, Brand brand) {
+        public async Task<IActionResult> PutBrand(int id, Brand brand) {
             if (id != brand.Id) {
                 return BadRequest();
             }
@@ -81,15 +82,17 @@ namespace EventService.API.Controllers {
                     request.Status
                 );
 
+                var createBrandOrder = new IdentifiedCommand<CreateBrandCommand, bool>(createBrandCommand, Guid.NewGuid());
+                
                 _logger.LogInformation(
-                    "Sending command: {CommandName} - {NameProperty}: {CommandName} ({@Command})",
-                    createBrandCommand.GetType().Name,
-                    nameof(createBrandCommand.Name),
-                    createBrandCommand.Name,
-                    createBrandCommand
+                    "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+                    createBrandOrder.GetType().Name,
+                    nameof(createBrandOrder.Id),
+                    createBrandOrder.Id,
+                    createBrandOrder
                 );
 
-                var result = await _mediator.Send(createBrandCommand);
+                var result = await _mediator.Send(createBrandOrder);
 
                 if (result) {
                     _logger.LogInformation("CreateOrderCommand succeeded");
@@ -103,7 +106,7 @@ namespace EventService.API.Controllers {
 
         // DELETE: api/Brands/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBrand(long id) {
+        public async Task<IActionResult> DeleteBrand(int id) {
             var brand = await _context.Brands.FindAsync(id);
             if (brand == null) {
                 return NotFound();
@@ -115,7 +118,7 @@ namespace EventService.API.Controllers {
             return NoContent();
         }
 
-        private bool BrandExists(long id) {
+        private bool BrandExists(int id) {
             return _context.Brands.Any(e => e.Id == id);
         }
     }

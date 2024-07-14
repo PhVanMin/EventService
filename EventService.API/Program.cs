@@ -1,5 +1,6 @@
 using EventService.API.Application.Behaviors;
 using EventService.Infrastructure;
+using EventService.Infrastructure.Idempotency;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,8 @@ builder.Services.AddMediatR(cfg =>
     //cfg.AddOpenBehavior(typeof(ValidatorBehavior<,>));
     //cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
 });
+
+builder.Services.AddScoped<IRequestManager, RequestManager>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

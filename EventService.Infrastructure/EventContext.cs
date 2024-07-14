@@ -18,7 +18,7 @@ public class EventContext : DbContext {
     public EventContext(DbContextOptions<EventContext> options, IMediator mediator)
         : base(options) {
         _mediator = mediator;
-        Database.EnsureCreated();
+        Database.Migrate();
     }
 
     private IMediator _mediator;
@@ -97,5 +97,6 @@ public class EventContext : DbContext {
         modelBuilder.ApplyConfiguration(new BrandEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new EventEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new ClientRequestEntityTypeConfiguration());
     }
 }

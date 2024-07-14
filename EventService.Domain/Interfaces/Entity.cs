@@ -5,7 +5,7 @@ namespace EventService.Domain.SeedWork {
     public class Entity {
         public int Id { get; protected set; }
 
-        private List<INotification> _domainEvents = null!;
+        private List<INotification> _domainEvents = new List<INotification>();
         [JsonIgnore]
         public IReadOnlyCollection<INotification> DomainEvents => _domainEvents.AsReadOnly();
 
@@ -14,7 +14,6 @@ namespace EventService.Domain.SeedWork {
         }
 
         public void AddDomainEvent(INotification eventItem) {
-            _domainEvents = _domainEvents ?? new List<INotification>();
             _domainEvents.Add(eventItem);
         }
 
