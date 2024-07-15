@@ -1,9 +1,10 @@
-﻿using EventService.Domain.Model;
+﻿using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventService.API.Controllers {
+namespace EventService.API.Controllers
+{
     [Route("api/[controller]")]
     [ApiController]
     public class VouchersController : ControllerBase {

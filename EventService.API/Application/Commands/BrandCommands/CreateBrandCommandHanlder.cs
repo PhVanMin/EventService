@@ -1,4 +1,4 @@
-﻿using EventService.Domain.Model;
+﻿using EventService.Domain.AggregateModels.BrandAggregate;
 using EventService.Infrastructure;
 using EventService.Infrastructure.Idempotency;
 using MediatR;
@@ -17,10 +17,10 @@ namespace EventService.API.Application.Commands.BrandCommands {
         }
 
         public async Task<bool> Handle(CreateBrandCommand request, CancellationToken cancellationToken) {
+            var location = new Location(request.Address, request.Gps);
             var brand = new Brand() {
                 Name = request.Name,
-                Address = request.Address,
-                Gps = request.Gps,
+                Location = location,
                 Field = request.Field,
                 Status = request.Status
             };
@@ -33,10 +33,10 @@ namespace EventService.API.Application.Commands.BrandCommands {
     }
 
     public class CreateBrandIdentifiedCommandHanlder : IdentifiedCommandHandler<CreateBrandCommand, bool> {
-        public CreateBrandIdentifiedCommandHanlder(IMediator mediator, 
-            IRequestManager requestManager, 
-            ILogger<IdentifiedCommandHandler<CreateBrandCommand, bool>> logger) 
-        : base(mediator, requestManager, logger) {}
+        public CreateBrandIdentifiedCommandHanlder(IMediator mediator,
+            IRequestManager requestManager,
+            ILogger<IdentifiedCommandHandler<CreateBrandCommand, bool>> logger)
+        : base(mediator, requestManager, logger) { }
 
         protected override bool CreateResultForDuplicateRequest() {
             return false;

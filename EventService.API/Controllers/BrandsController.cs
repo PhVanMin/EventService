@@ -1,18 +1,18 @@
 ﻿using EventService.API.Application.Commands;
 using EventService.API.Application.Commands.BrandCommands;
 using EventService.API.Application.Queries.BrandQueries;
-using EventService.Domain.Model;
+using EventService.Domain.AggregateModels.BrandAggregate;
 using EventService.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace EventService.API.Controllers {
+namespace EventService.API.Controllers
+{
     [Route("api/[controller]")]
     [ApiController]
     public class BrandsController : ControllerBase {
         private readonly EventContext _context;
-        private readonly BrandServices _services;
-        public BrandsController(EventContext context, BrandServices services) {
+        private readonly ControllerServices _services;
+        public BrandsController(EventContext context, ControllerServices services) {
             _context = context;
             _services = services;
         }
@@ -35,79 +35,83 @@ namespace EventService.API.Controllers {
             }
         }
 
-        // PUT: api/Brands/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBrand(int id, Brand brand) {
-            if (id != brand.Id) {
-                return BadRequest();
-            }
+        public async Task<IActionResult> PutBrand(int id, UpdateBrandRequest request) {
+            var command = new UpdateBrandCommand(id, request.Name, request.Field, request.Status);
 
-            _context.Entry(brand).State = EntityState.Modified;
+            var updateBrandOrder = new IdentifiedCommand<UpdateBrandCommand, bool>(command, Guid.NewGuid());
 
-            try {
-                await _context.SaveChangesAsync();
-            } catch (DbUpdateConcurrencyException) {
-                if (!BrandExists(id)) {
-                    return NotFound();
-                } else {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Brands
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Brand>> PostBrand(CreateBrandCommand command) {
             _services.Logger.LogInformation(
-                "Sending command: {CommandName} - {NameProperty}: {CommandName}",
-                command.GetType().Name,
-                nameof(command.Name),
-                command.Name
+                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+                updateBrandOrder.GetType().Name,
+                nameof(updateBrandOrder.Id),
+                updateBrandOrder.Id,
+                updateBrandOrder
             );
 
-            using (_services.Logger.BeginScope(new List<KeyValuePair<string, object>> { new("CreateBrandCommand", "command") })) {
-                var createBrandOrder = new IdentifiedCommand<CreateBrandCommand, bool>(command, Guid.NewGuid());
+            var result = await _services.Mediator.Send(updateBrandOrder);
 
-                _services.Logger.LogInformation(
-                    "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
-                    createBrandOrder.GetType().Name,
-                    nameof(createBrandOrder.Id),
-                    createBrandOrder.Id,
-                    createBrandOrder
-                );
+            if (result) {
+                _services.Logger.LogInformation("UpdateBrandCommand succeeded");
+                return NoContent();
+            } else {
+                _services.Logger.LogWarning("UpdateBrandCommand failed");
+                return BadRequest();
+            }
+        }
 
-                var result = await _services.Mediator.Send(createBrandOrder);
+        [HttpPost]
+        public async Task<ActionResult<Brand>> PostBrand(CreateBrandCommand command) {
+            var createBrandOrder = new IdentifiedCommand<CreateBrandCommand, bool>(command, Guid.NewGuid());
 
-                if (result) {
-                    _services.Logger.LogInformation("CreateOrderCommand succeeded");
-                    return Ok();
-                } else {
-                    _services.Logger.LogWarning("CreateOrderCommand failed");
-                    return BadRequest();
-                }
+            _services.Logger.LogInformation(
+                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+                createBrandOrder.GetType().Name,
+                nameof(createBrandOrder.Id),
+                createBrandOrder.Id,
+                createBrandOrder
+            );
+
+            var result = await _services.Mediator.Send(createBrandOrder);
+
+            if (result) {
+                _services.Logger.LogInformation("CreateBrandCommand succeeded");
+                return Ok();
+            } else {
+                _services.Logger.LogWarning("CreateBrandCommand failed");
+                return BadRequest();
             }
         }
 
         // DELETE: api/Brands/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBrand(int id) {
-            var brand = await _context.Brands.FindAsync(id);
-            if (brand == null) {
-                return NotFound();
+            var command = new DeleteBrandCommand(id);
+            var deleteBrandOrder = new IdentifiedCommand<DeleteBrandCommand, bool>(command, Guid.NewGuid());
+
+            _services.Logger.LogInformation(
+                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+                deleteBrandOrder.GetType().Name,
+                nameof(deleteBrandOrder.Id),
+                deleteBrandOrder.Id,
+                deleteBrandOrder
+            );
+
+            var result = await _services.Mediator.Send(deleteBrandOrder);
+
+            if (result) {
+                _services.Logger.LogInformation("DeleteBrandCommand succeeded");
+                return NoContent();
+            } else {
+                _services.Logger.LogWarning("DeleteBrandCommand failed");
+                return BadRequest();
             }
-
-            _context.Brands.Remove(brand);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
-        private bool BrandExists(int id) {
-            return _context.Brands.Any(e => e.Id == id);
-        }
+        public record UpdateBrandRequest(
+            string Name,
+            string Field,
+            short Status
+        );
     }
 }

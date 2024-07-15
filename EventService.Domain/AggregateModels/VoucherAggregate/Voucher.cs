@@ -1,8 +1,9 @@
-﻿using EventService.Domain.Interfaces;
+﻿using EventService.Domain.AggregateModels.EventAggregate;
+using EventService.Domain.Interfaces;
 using EventService.Domain.SeedWork;
 using System.Text.Json.Serialization;
 
-namespace EventService.Domain.Model;
+namespace EventService.Domain.AggregateModels.VoucherAggregate;
 public class Voucher : Entity, IAggregateRoot {
     public string Code { get; set; } = null!;
 

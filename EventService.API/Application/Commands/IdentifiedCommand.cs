@@ -1,6 +1,4 @@
-﻿using EventService.API.Application.Commands.BrandCommands;
-using EventService.Infrastructure.Idempotency;
-using MediatR;
+﻿using MediatR;
 
 namespace EventService.API.Application.Commands {
     public class IdentifiedCommand<T, R> : IRequest<R> where T : IRequest<R> {

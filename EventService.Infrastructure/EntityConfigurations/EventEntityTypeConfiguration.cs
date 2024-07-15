@@ -1,4 +1,4 @@
-﻿using EventService.Domain.Model;
+﻿using EventService.Domain.AggregateModels.EventAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

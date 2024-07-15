@@ -1,4 +1,6 @@
-﻿using EventService.Domain.Model;
+﻿using EventService.Domain.AggregateModels.BrandAggregate;
+using EventService.Domain.AggregateModels.EventAggregate;
+using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Infrastructure.EntityConfigurations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

@@ -1,8 +1,9 @@
-﻿using EventService.Domain.Model;
+﻿using EventService.Domain.AggregateModels.BrandAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EventService.Infrastructure.EntityConfigurations {
+namespace EventService.Infrastructure.EntityConfigurations
+{
     public class BrandEntityTypeConfiguration : IEntityTypeConfiguration<Brand> {
         public void Configure(EntityTypeBuilder<Brand> builder) {
             builder.ToTable("brand");
@@ -13,9 +14,15 @@ namespace EventService.Infrastructure.EntityConfigurations {
                 .ValueGeneratedOnAdd()
                 .HasColumnName("id");
 
-            builder.Property(e => e.Address).HasColumnName("address");
+            builder.OwnsOne(
+                e => e.Location, 
+                lo => {
+                    lo.Property(l => l.Address).HasColumnName("address");
+                    lo.Property(l => l.Gps).HasColumnName("gps");
+                }
+            );
+
             builder.Property(e => e.Field).HasColumnName("field");
-            builder.Property(e => e.Gps).HasColumnName("gps");
             builder.Property(e => e.Name).HasColumnName("name");
             builder.Property(e => e.Status).HasColumnName("status");
         }

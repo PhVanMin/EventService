@@ -3,8 +3,8 @@
         public int Id { get; set; }
         public string Name { get; set; } = null!;
         public string Field { get; set; } = null!;
-        public string? Address { get; set; }
-        public string? Gps { get; set; }
+        public string Address { get; set; } = null!;
+        public string Gps { get; set; } = null!;
         public int Status { get; set; }
         public List<BrandEventViewModel> Events { get; set; } = null!;
     }

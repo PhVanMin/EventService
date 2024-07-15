@@ -1,8 +1,10 @@
-﻿using EventService.Domain.Interfaces;
+﻿using EventService.Domain.AggregateModels.BrandAggregate;
+using EventService.Domain.AggregateModels.VoucherAggregate;
+using EventService.Domain.Interfaces;
 using EventService.Domain.SeedWork;
 using System.Text.Json.Serialization;
 
-namespace EventService.Domain.Model;
+namespace EventService.Domain.AggregateModels.EventAggregate;
 
 public class Event : Entity, IAggregateRoot {
     public string Name { get; set; } = null!;

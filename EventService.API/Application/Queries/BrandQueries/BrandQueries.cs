@@ -1,5 +1,4 @@
-﻿using EventService.Domain.Model;
-using EventService.Infrastructure;
+﻿using EventService.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventService.API.Application.Queries.BrandQueries {
@@ -10,8 +9,8 @@ namespace EventService.API.Application.Queries.BrandQueries {
                 .Select(b => new BrandViewModel {
                     Id = b.Id,
                     Name = b.Name,
-                    Address = b.Address, 
-                    Gps = b.Gps,
+                    Address = b.Location.Address,
+                    Gps = b.Location.Gps,
                     Field = b.Field,
                     Status = b.Status,
                     Events = b.Events.Select(e => new BrandEventViewModel {
@@ -36,8 +35,8 @@ namespace EventService.API.Application.Queries.BrandQueries {
             return new BrandViewModel {
                 Id = brand.Id,
                 Name = brand.Name,
-                Address = brand.Address,
-                Gps = brand.Gps,
+                Address = brand.Location.Address,
+                Gps = brand.Location.Gps,
                 Field = brand.Field,
                 Status = brand.Status,
                 Events = brand.Events.Select(e => new BrandEventViewModel {

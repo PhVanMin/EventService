@@ -2,12 +2,12 @@
 using MediatR;
 
 namespace EventService.API.Controllers {
-    public class BrandServices(
+    public class ControllerServices(
     IMediator mediator,
     IBrandQueries queries,
-    ILogger<BrandServices> logger) {
+    ILogger<ControllerServices> logger) {
         public IMediator Mediator { get; set; } = mediator;
-        public ILogger<BrandServices> Logger { get; } = logger;
+        public ILogger<ControllerServices> Logger { get; } = logger;
         public IBrandQueries Queries { get; } = queries;
     }
 }

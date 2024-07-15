@@ -18,7 +18,7 @@ namespace EventService.API.Extensions {
 
             builder.Services.AddScoped<IRequestManager, RequestManager>();
             builder.Services.AddScoped<IBrandQueries, BrandQueries>();
-            builder.Services.AddScoped<BrandServices>();
+            builder.Services.AddScoped<ControllerServices>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

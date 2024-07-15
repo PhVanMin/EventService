@@ -1,8 +1,9 @@
-﻿using EventService.Domain.Model;
+﻿using EventService.Domain.AggregateModels.VoucherAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EventService.Infrastructure.EntityConfigurations {
+namespace EventService.Infrastructure.EntityConfigurations
+{
     public class VoucherEntityTypeConfiguration : IEntityTypeConfiguration<Voucher> {
         public void Configure(EntityTypeBuilder<Voucher> builder) {
             builder.ToTable("voucher");

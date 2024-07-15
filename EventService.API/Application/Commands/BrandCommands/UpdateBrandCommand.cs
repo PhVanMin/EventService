@@ -1,11 +1,10 @@
 ﻿using MediatR;
 
 namespace EventService.API.Application.Commands.BrandCommands {
-    public record CreateBrandCommand(
+    public record UpdateBrandCommand(
+        int id,
         string Name,
         string Field,
-        string Address,
-        string Gps,
-        int Status
+        short Status
     ) : IRequest<bool>;
 }
