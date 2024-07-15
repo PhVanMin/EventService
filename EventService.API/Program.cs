@@ -1,30 +1,10 @@
-using EventService.API.Application.Behaviors;
-using EventService.Infrastructure;
-using EventService.Infrastructure.Idempotency;
-using Microsoft.EntityFrameworkCore;
+using EventService.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterServicesFromAssemblyContaining(typeof(Program));
-    cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
-    //cfg.AddOpenBehavior(typeof(ValidatorBehavior<,>));
-    //cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
-});
-
-builder.Services.AddScoped<IRequestManager, RequestManager>();
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddDbContext<EventContext>(
-    options => options.UseNpgsql(builder.Configuration.GetConnectionString("database")
-));
-
 builder.Services.AddSwaggerGen();
-
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
+builder.AddApplicationServices();
+builder.AddLoggingServices();
 
 var app = builder.Build();
 

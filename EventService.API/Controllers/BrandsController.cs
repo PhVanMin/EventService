@@ -1,9 +1,8 @@
 ﻿using EventService.API.Application.Commands;
 using EventService.API.Application.Commands.BrandCommands;
-using EventService.API.DTOs.Brand;
+using EventService.API.Application.Queries.BrandQueries;
 using EventService.Domain.Model;
 using EventService.Infrastructure;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,31 +11,28 @@ namespace EventService.API.Controllers {
     [ApiController]
     public class BrandsController : ControllerBase {
         private readonly EventContext _context;
-        private readonly ILogger<BrandsController> _logger;
-        private readonly IMediator _mediator;
-
-        public BrandsController(EventContext context, ILogger<BrandsController> logger, IMediator mediator) {
+        private readonly BrandServices _services;
+        public BrandsController(EventContext context, BrandServices services) {
             _context = context;
-            _logger = logger;
-            _mediator = mediator;
+            _services = services;
         }
 
         // GET: api/Brands
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Brand>>> GetBrands() {
-            return await _context.Brands.Include(b => b.Events).ToListAsync();
+        public async Task<ActionResult<IEnumerable<BrandViewModel>>> GetBrands() {
+            var brands = await _services.Queries.GetAllBrand();
+            return Ok(brands);
         }
 
         // GET: api/Brands/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Brand>> GetBrand(int id) {
-            var brand = await _context.Brands.FindAsync(id);
-
-            if (brand == null) {
+        public async Task<ActionResult<BrandViewModel>> GetBrand(int id) {
+            try {
+                var brand = await _services.Queries.GetBrand(id);
+                return Ok(brand);
+            } catch {
                 return NotFound();
             }
-
-            return brand;
         }
 
         // PUT: api/Brands/5
@@ -65,26 +61,18 @@ namespace EventService.API.Controllers {
         // POST: api/Brands
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Brand>> PostBrand(CreateBrandRequest request) {
-            _logger.LogInformation(
+        public async Task<ActionResult<Brand>> PostBrand(CreateBrandCommand command) {
+            _services.Logger.LogInformation(
                 "Sending command: {CommandName} - {NameProperty}: {CommandName}",
-                request.GetType().Name,
-                nameof(request.Name),
-                request.Name
+                command.GetType().Name,
+                nameof(command.Name),
+                command.Name
             );
 
-            using (_logger.BeginScope(new List<KeyValuePair<string, object>> { new("CreateBrandCommand", "command") })) {
-                var createBrandCommand = new CreateBrandCommand(
-                    request.Name, 
-                    request.Field, 
-                    request.Address, 
-                    request.Gps, 
-                    request.Status
-                );
+            using (_services.Logger.BeginScope(new List<KeyValuePair<string, object>> { new("CreateBrandCommand", "command") })) {
+                var createBrandOrder = new IdentifiedCommand<CreateBrandCommand, bool>(command, Guid.NewGuid());
 
-                var createBrandOrder = new IdentifiedCommand<CreateBrandCommand, bool>(createBrandCommand, Guid.NewGuid());
-                
-                _logger.LogInformation(
+                _services.Logger.LogInformation(
                     "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
                     createBrandOrder.GetType().Name,
                     nameof(createBrandOrder.Id),
@@ -92,13 +80,13 @@ namespace EventService.API.Controllers {
                     createBrandOrder
                 );
 
-                var result = await _mediator.Send(createBrandOrder);
+                var result = await _services.Mediator.Send(createBrandOrder);
 
                 if (result) {
-                    _logger.LogInformation("CreateOrderCommand succeeded");
+                    _services.Logger.LogInformation("CreateOrderCommand succeeded");
                     return Ok();
                 } else {
-                    _logger.LogWarning("CreateOrderCommand failed");
+                    _services.Logger.LogWarning("CreateOrderCommand failed");
                     return BadRequest();
                 }
             }

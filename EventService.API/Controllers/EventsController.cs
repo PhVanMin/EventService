@@ -1,42 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using EventService.Domain.Model;
+using EventService.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using EventService.Infrastructure;
-using EventService.API.DTOs.Event;
-using EventService.Domain.Model;
 
-namespace EventService.API.Controllers
-{
+namespace EventService.API.Controllers {
     [Route("api/[controller]")]
     [ApiController]
-    public class EventsController : ControllerBase
-    {
+    public class EventsController : ControllerBase {
         private readonly EventContext _context;
 
-        public EventsController(EventContext context)
-        {
+        public EventsController(EventContext context) {
             _context = context;
         }
 
         // GET: api/Events
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
-        {
+        public async Task<ActionResult<IEnumerable<Event>>> GetEvents() {
             return await _context.Events.ToListAsync();
         }
 
         // GET: api/Events/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Event>> GetEvent(long id)
-        {
+        public async Task<ActionResult<Event>> GetEvent(long id) {
             var @event = await _context.Events.FindAsync(id);
 
-            if (@event == null)
-            {
+            if (@event == null) {
                 return NotFound();
             }
 
@@ -46,27 +34,19 @@ namespace EventService.API.Controllers
         // PUT: api/Events/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEvent(long id, Event @event)
-        {
-            if (id != @event.Id)
-            {
+        public async Task<IActionResult> PutEvent(long id, Event @event) {
+            if (id != @event.Id) {
                 return BadRequest();
             }
 
             _context.Entry(@event).State = EntityState.Modified;
 
-            try
-            {
+            try {
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EventExists(id))
-                {
+            } catch (DbUpdateConcurrencyException) {
+                if (!EventExists(id)) {
                     return NotFound();
-                }
-                else
-                {
+                } else {
                     throw;
                 }
             }
@@ -76,30 +56,28 @@ namespace EventService.API.Controllers
 
         // POST: api/Events
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Event>> PostEvent(CreateEventRequest request)
-        {
-            var @event = new Event() {
-                Name = request.Name,
-                Image = request.Image,
-                BrandId = request.BrandId,
-                GameId = request.GameId,
-                NoVoucher = request.NoVoucher
-            };
+        //[HttpPost]
+        //public async Task<ActionResult<Event>> PostEvent(CreateEventRequest request)
+        //{
+        //    var @event = new Event() {
+        //        Name = request.Name,
+        //        Image = request.Image,
+        //        BrandId = request.BrandId,
+        //        GameId = request.GameId,
+        //        NoVoucher = request.NoVoucher
+        //    };
 
-            _context.Events.Add(@event);
-            await _context.SaveChangesAsync();
+        //    _context.Events.Add(@event);
+        //    await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetEvent", new { id = @event.Id }, @event);
-        }
+        //    return CreatedAtAction("GetEvent", new { id = @event.Id }, @event);
+        //}
 
         // DELETE: api/Events/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEvent(long id)
-        {
+        public async Task<IActionResult> DeleteEvent(long id) {
             var @event = await _context.Events.FindAsync(id);
-            if (@event == null)
-            {
+            if (@event == null) {
                 return NotFound();
             }
 
@@ -109,8 +87,7 @@ namespace EventService.API.Controllers
             return NoContent();
         }
 
-        private bool EventExists(long id)
-        {
+        private bool EventExists(long id) {
             return _context.Events.Any(e => e.Id == id);
         }
     }
