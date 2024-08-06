@@ -1,5 +1,6 @@
 ﻿using EventService.API.Application.Commands;
 using EventService.API.Application.Commands.EventCommands;
+using EventService.API.Application.Commands.VoucherCommands;
 using EventService.Domain.AggregateModels.BrandAggregate;
 using EventService.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -44,30 +45,49 @@ namespace EventService.API.Controllers {
             }
         }
 
-        [HttpPost]
-        public async Task<ActionResult<Brand>> RegisterEventForBrand(RegisterEventRequest request) {
-            var command = new CreateEventCommand(
-                request.brandId, request.name,
-                request.image, request.noVoucher,
-                request.start, request.end,
-                request.gameId, request.vouchers);
-            var createBrandOrder = new IdentifiedCommand<CreateEventCommand, bool>(command, Guid.NewGuid());
+        [HttpPut("{id}/Vouchers")]
+        public async Task<IActionResult> UpdateEventVouchers(int id, UpdateEventVouchersRequest request) {
+            var command = new UpdateEventVouchersCommand(request.voucherIds, id);
+            var updateEventVouchersOrder = new IdentifiedCommand<UpdateEventVouchersCommand, bool>(command, Guid.NewGuid());
 
             _services.Logger.LogInformation(
                 "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
-                createBrandOrder.GetType().Name,
-                nameof(createBrandOrder.Id),
-                createBrandOrder.Id,
-                createBrandOrder
+                updateEventVouchersOrder.GetType().Name,
+                nameof(updateEventVouchersOrder.Id),
+                updateEventVouchersOrder.Id,
+                updateEventVouchersOrder
             );
 
-            var result = await _services.Mediator.Send(createBrandOrder);
+            var result = await _services.Mediator.Send(updateEventVouchersOrder);
 
             if (result) {
-                _services.Logger.LogInformation("CreateBrandCommand succeeded");
+                _services.Logger.LogInformation("UpdateEventVouchersCommand succeeded");
+                return NoContent();
+            } else {
+                _services.Logger.LogWarning("UpdateEventVouchersCommand failed");
+                return BadRequest();
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterEventForBrand(CreateEventCommand command) {
+            var createEventOrder = new IdentifiedCommand<CreateEventCommand, bool>(command, Guid.NewGuid());
+
+            _services.Logger.LogInformation(
+                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+                createEventOrder.GetType().Name,
+                nameof(createEventOrder.Id),
+                createEventOrder.Id,
+                createEventOrder
+            );
+
+            var result = await _services.Mediator.Send(createEventOrder);
+
+            if (result) {
+                _services.Logger.LogInformation("CreateEventCommand succeeded");
                 return Ok();
             } else {
-                _services.Logger.LogWarning("CreateBrandCommand failed");
+                _services.Logger.LogWarning("CreateEventCommand failed");
                 return BadRequest();
             }
         }
@@ -82,15 +102,8 @@ namespace EventService.API.Controllers {
             int gameId
         );
 
-        public record RegisterEventRequest(
-            int brandId,
-            string name,
-            string image,
-            int noVoucher,
-            DateTime start,
-            DateTime end,
-            int gameId,
-            List<VoucherDTO> vouchers
+        public record UpdateEventVouchersRequest(
+            List<int> voucherIds
         );
     }
 }
