@@ -15,15 +15,15 @@ namespace EventService.Infrastructure.EntityConfigurations
                 .HasColumnName("id");
             builder.Property(e => e.Code).HasColumnName("code");
             builder.Property(e => e.Description).HasColumnName("description");
-            builder.Property(e => e.EventId).HasColumnName("event_id");
+            builder.Property(e => e.BrandId).HasColumnName("brand_id");
             builder.Property(e => e.ExpireDate).HasColumnName("expire_date");
             builder.Property(e => e.Image).HasColumnName("image");
             builder.Property(e => e.Status).HasColumnName("status");
             builder.Property(e => e.Value).HasColumnName("value");
 
-            builder.HasOne(e => e.Event)
+            builder.HasOne(e => e.Brand)
                     .WithMany(e => e.Vouchers)
-                    .HasForeignKey(e => e.EventId);
+                    .HasForeignKey(e => e.BrandId);
         }
     }
 }

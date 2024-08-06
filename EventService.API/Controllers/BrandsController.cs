@@ -1,32 +1,22 @@
 ﻿using EventService.API.Application.Commands;
 using EventService.API.Application.Commands.BrandCommands;
-using EventService.API.Application.Queries.BrandQueries;
-using EventService.Domain.AggregateModels.BrandAggregate;
+using EventService.API.Application.Queries;
 using EventService.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EventService.API.Controllers
-{
+namespace EventService.API.Controllers {
     [Route("api/[controller]")]
     [ApiController]
     public class BrandsController : ControllerBase {
         private readonly EventContext _context;
-        private readonly ControllerServices _services;
-        public BrandsController(EventContext context, ControllerServices services) {
+        private readonly EventAPIService _services;
+        public BrandsController(EventContext context, EventAPIService services) {
             _context = context;
             _services = services;
         }
 
-        // GET: api/Brands
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<BrandViewModel>>> GetBrands() {
-            var brands = await _services.Queries.GetAllBrand();
-            return Ok(brands);
-        }
-
-        // GET: api/Brands/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BrandViewModel>> GetBrand(int id) {
+        public async Task<ActionResult<BrandVM>> GetBrandById(int id) {
             try {
                 var brand = await _services.Queries.GetBrand(id);
                 return Ok(brand);
@@ -35,8 +25,18 @@ namespace EventService.API.Controllers
             }
         }
 
+        [HttpGet("{id}/Events")]
+        public async Task<ActionResult<IEnumerable<EventVM>>> GetEventsByBrandId(int id) {
+            try {
+                var brand = await _services.Queries.GetBrandEvent(id);
+                return Ok(brand);
+            } catch {
+                return NotFound();
+            }
+        }
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBrand(int id, UpdateBrandRequest request) {
+        public async Task<IActionResult> UpdateBrand(int id, UpdateBrandRequest request) {
             var command = new UpdateBrandCommand(id, request.Name, request.Field, request.Status);
 
             var updateBrandOrder = new IdentifiedCommand<UpdateBrandCommand, bool>(command, Guid.NewGuid());
@@ -56,54 +56,6 @@ namespace EventService.API.Controllers
                 return NoContent();
             } else {
                 _services.Logger.LogWarning("UpdateBrandCommand failed");
-                return BadRequest();
-            }
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Brand>> PostBrand(CreateBrandCommand command) {
-            var createBrandOrder = new IdentifiedCommand<CreateBrandCommand, bool>(command, Guid.NewGuid());
-
-            _services.Logger.LogInformation(
-                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
-                createBrandOrder.GetType().Name,
-                nameof(createBrandOrder.Id),
-                createBrandOrder.Id,
-                createBrandOrder
-            );
-
-            var result = await _services.Mediator.Send(createBrandOrder);
-
-            if (result) {
-                _services.Logger.LogInformation("CreateBrandCommand succeeded");
-                return Ok();
-            } else {
-                _services.Logger.LogWarning("CreateBrandCommand failed");
-                return BadRequest();
-            }
-        }
-
-        // DELETE: api/Brands/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBrand(int id) {
-            var command = new DeleteBrandCommand(id);
-            var deleteBrandOrder = new IdentifiedCommand<DeleteBrandCommand, bool>(command, Guid.NewGuid());
-
-            _services.Logger.LogInformation(
-                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
-                deleteBrandOrder.GetType().Name,
-                nameof(deleteBrandOrder.Id),
-                deleteBrandOrder.Id,
-                deleteBrandOrder
-            );
-
-            var result = await _services.Mediator.Send(deleteBrandOrder);
-
-            if (result) {
-                _services.Logger.LogInformation("DeleteBrandCommand succeeded");
-                return NoContent();
-            } else {
-                _services.Logger.LogWarning("DeleteBrandCommand failed");
                 return BadRequest();
             }
         }

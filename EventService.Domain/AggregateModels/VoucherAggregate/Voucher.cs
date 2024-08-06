@@ -1,7 +1,6 @@
-﻿using EventService.Domain.AggregateModels.EventAggregate;
+﻿using EventService.Domain.AggregateModels.BrandAggregate;
 using EventService.Domain.Interfaces;
 using EventService.Domain.SeedWork;
-using System.Text.Json.Serialization;
 
 namespace EventService.Domain.AggregateModels.VoucherAggregate;
 public class Voucher : Entity, IAggregateRoot {
@@ -17,8 +16,22 @@ public class Voucher : Entity, IAggregateRoot {
 
     public int Status { get; set; }
 
-    public int EventId { get; set; }
+    public int BrandId { get; set; }
 
-    [JsonIgnore]
-    public Event Event { get; set; } = null!;
+    public Brand Brand { get; set; } = null!;
+
+    private List<EventVoucher> _events;
+    public IReadOnlyCollection<EventVoucher> EventVouchers => _events.AsReadOnly();
+
+    public Voucher() {
+        _events = new List<EventVoucher>();
+    }
+
+    public void Update(string image, int value, string description, DateTime expireDate, int status) {
+        Image = image;
+        Value = value;
+        Description = description;
+        ExpireDate = expireDate;
+        Status = status;
+    }
 }

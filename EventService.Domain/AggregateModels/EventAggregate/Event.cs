@@ -1,8 +1,8 @@
 ﻿using EventService.Domain.AggregateModels.BrandAggregate;
 using EventService.Domain.AggregateModels.VoucherAggregate;
+using EventService.Domain.Exceptions;
 using EventService.Domain.Interfaces;
 using EventService.Domain.SeedWork;
-using System.Text.Json.Serialization;
 
 namespace EventService.Domain.AggregateModels.EventAggregate;
 
@@ -21,13 +21,39 @@ public class Event : Entity, IAggregateRoot {
 
     public int? GameId { get; set; }
 
-    [JsonIgnore]
     public Brand Brand { get; set; } = null!;
 
-    private List<Voucher> _vouchers;
-    public IReadOnlyCollection<Voucher> Vouchers => _vouchers.AsReadOnly();
+    private List<EventVoucher> _vouchers;
+    public IReadOnlyCollection<EventVoucher> EventVouchers => _vouchers.AsReadOnly();
 
     public Event() {
-        _vouchers = new List<Voucher>();
+        _vouchers = new List<EventVoucher>();
+    }
+
+    public void Update(string name, string image, int noVoucher, DateTime start, DateTime end, int gameId) {
+        Name = name;
+        Image = image;
+        NoVoucher = noVoucher;
+        StartDate = start;
+        EndDate = end;
+        GameId = gameId;
+    }
+
+    public void AddVoucher(Voucher voucher) {
+        var newVoucher = _vouchers.FirstOrDefault(v => v.VoucherId == voucher.Id);
+        if (newVoucher != null)
+            throw new EventDomainException("Voucher already exists.");
+
+        _vouchers.Add(new EventVoucher {
+            EventId = Id,
+            VoucherId = voucher.Id
+        });
+    }
+
+    public void UpdateVouchers(List<Voucher> vouchers) {
+        _vouchers = vouchers.Select(v => new EventVoucher {
+            EventId = Id,
+            VoucherId = v.Id
+        }).ToList();
     }
 }

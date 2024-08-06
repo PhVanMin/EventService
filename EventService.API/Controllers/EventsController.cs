@@ -1,95 +1,96 @@
-﻿using EventService.Domain.AggregateModels.EventAggregate;
+﻿using EventService.API.Application.Commands;
+using EventService.API.Application.Commands.EventCommands;
+using EventService.Domain.AggregateModels.BrandAggregate;
 using EventService.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace EventService.API.Controllers
-{
+namespace EventService.API.Controllers {
     [Route("api/[controller]")]
     [ApiController]
     public class EventsController : ControllerBase {
         private readonly EventContext _context;
-
-        public EventsController(EventContext context) {
+        private readonly EventAPIService _services;
+        public EventsController(EventContext context, EventAPIService services) {
             _context = context;
+            _services = services;
         }
 
-        // GET: api/Events
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Event>>> GetEvents() {
-            return await _context.Events.ToListAsync();
-        }
-
-        // GET: api/Events/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Event>> GetEvent(long id) {
-            var @event = await _context.Events.FindAsync(id);
-
-            if (@event == null) {
-                return NotFound();
-            }
-
-            return @event;
-        }
-
-        // PUT: api/Events/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEvent(long id, Event @event) {
-            if (id != @event.Id) {
+        public async Task<IActionResult> UpdateBrandEvent(int id, UpdateEventRequest request) {
+            var command = new UpdateEventCommand(
+                request.brandId, id,
+                request.name, request.image,
+                request.noVoucher, request.start,
+                request.end, request.gameId);
+
+            var updateBrandEventOrder = new IdentifiedCommand<UpdateEventCommand, bool>(command, Guid.NewGuid());
+
+            _services.Logger.LogInformation(
+                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+                updateBrandEventOrder.GetType().Name,
+                nameof(updateBrandEventOrder.Id),
+                updateBrandEventOrder.Id,
+                updateBrandEventOrder
+            );
+
+            var result = await _services.Mediator.Send(updateBrandEventOrder);
+
+            if (result) {
+                _services.Logger.LogInformation("UpdateBrandEventCommand succeeded");
+                return NoContent();
+            } else {
+                _services.Logger.LogWarning("UpdateBrandEventCommand failed");
                 return BadRequest();
             }
+        }
 
-            _context.Entry(@event).State = EntityState.Modified;
+        [HttpPost]
+        public async Task<ActionResult<Brand>> RegisterEventForBrand(RegisterEventRequest request) {
+            var command = new CreateEventCommand(
+                request.brandId, request.name,
+                request.image, request.noVoucher,
+                request.start, request.end,
+                request.gameId, request.vouchers);
+            var createBrandOrder = new IdentifiedCommand<CreateEventCommand, bool>(command, Guid.NewGuid());
 
-            try {
-                await _context.SaveChangesAsync();
-            } catch (DbUpdateConcurrencyException) {
-                if (!EventExists(id)) {
-                    return NotFound();
-                } else {
-                    throw;
-                }
+            _services.Logger.LogInformation(
+                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+                createBrandOrder.GetType().Name,
+                nameof(createBrandOrder.Id),
+                createBrandOrder.Id,
+                createBrandOrder
+            );
+
+            var result = await _services.Mediator.Send(createBrandOrder);
+
+            if (result) {
+                _services.Logger.LogInformation("CreateBrandCommand succeeded");
+                return Ok();
+            } else {
+                _services.Logger.LogWarning("CreateBrandCommand failed");
+                return BadRequest();
             }
-
-            return NoContent();
         }
 
-        // POST: api/Events
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Event>> PostEvent(CreateEventRequest request)
-        //{
-        //    var @event = new Event() {
-        //        Name = request.Name,
-        //        Image = request.Image,
-        //        BrandId = request.BrandId,
-        //        GameId = request.GameId,
-        //        NoVoucher = request.NoVoucher
-        //    };
+        public record UpdateEventRequest(
+            int brandId,
+            string name,
+            string image,
+            int noVoucher,
+            DateTime start,
+            DateTime end,
+            int gameId
+        );
 
-        //    _context.Events.Add(@event);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetEvent", new { id = @event.Id }, @event);
-        //}
-
-        // DELETE: api/Events/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEvent(long id) {
-            var @event = await _context.Events.FindAsync(id);
-            if (@event == null) {
-                return NotFound();
-            }
-
-            _context.Events.Remove(@event);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool EventExists(long id) {
-            return _context.Events.Any(e => e.Id == id);
-        }
+        public record RegisterEventRequest(
+            int brandId,
+            string name,
+            string image,
+            int noVoucher,
+            DateTime start,
+            DateTime end,
+            int gameId,
+            List<VoucherDTO> vouchers
+        );
     }
 }

@@ -1,11 +1,12 @@
 ﻿using EventService.API.Application.Behaviors;
-using EventService.API.Application.Queries.BrandQueries;
+using EventService.API.Application.Queries;
 using EventService.API.Controllers;
 using EventService.Infrastructure;
 using EventService.Infrastructure.Idempotency;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventService.API.Extensions {
+namespace EventService.API.Extensions
+{
     internal static class Extensions {
         public static void AddApplicationServices(this IHostApplicationBuilder builder) {
             builder.Services.AddMediatR(cfg =>
@@ -13,12 +14,12 @@ namespace EventService.API.Extensions {
                 cfg.RegisterServicesFromAssemblyContaining(typeof(Program));
                 cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
                 //cfg.AddOpenBehavior(typeof(ValidatorBehavior<,>));
-                //cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
+                cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
             });
 
             builder.Services.AddScoped<IRequestManager, RequestManager>();
-            builder.Services.AddScoped<IBrandQueries, BrandQueries>();
-            builder.Services.AddScoped<ControllerServices>();
+            builder.Services.AddScoped<IEventQueries, EventQueries>();
+            builder.Services.AddScoped<EventAPIService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

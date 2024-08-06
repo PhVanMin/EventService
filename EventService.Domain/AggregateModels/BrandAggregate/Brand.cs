@@ -1,4 +1,5 @@
 ﻿using EventService.Domain.AggregateModels.EventAggregate;
+using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Domain.Exceptions;
 using EventService.Domain.Interfaces;
 using EventService.Domain.SeedWork;
@@ -18,9 +19,13 @@ public class Brand : Entity, IAggregateRoot {
 
     private List<Event> _events;
     public IReadOnlyCollection<Event> Events => _events.AsReadOnly();
+    
+    private List<Voucher> _vouchers;
+    public IReadOnlyCollection<Voucher> Vouchers => _vouchers.AsReadOnly();
 
     public Brand() {
         _events = new List<Event>();
+        _vouchers = new List<Voucher>();
     }
 
     public void Update(string name, string field, short status) {
@@ -31,9 +36,8 @@ public class Brand : Entity, IAggregateRoot {
 
     public void AddEvent(string name, string image, int noVoucher, DateTime start, DateTime end, int gameId) {
         var @event = _events.FirstOrDefault(e => e.Name == name);
-
         if (@event != null) {
-            throw new EventDomainException("$Event with name \"{ name }\" already exists.");
+            throw new EventDomainException($"Event with name \"{name}\" already exists.");
         }
 
         @event = new Event() {
@@ -46,5 +50,21 @@ public class Brand : Entity, IAggregateRoot {
         };
 
         _events.Add(@event);
+    }
+    public void AddVoucher(string code, string image, int value, string description, DateTime expireDate, int status) {
+        var voucher = _vouchers.FirstOrDefault(v => v.Code == code);
+        if (voucher != null)
+            throw new EventDomainException("Voucher already exists.");
+
+        voucher = new Voucher() {
+            Code = code,
+            Image = image,
+            Value = value,
+            Description = description,
+            ExpireDate = expireDate,
+            Status = status
+        };
+
+        _vouchers.Add(voucher);
     }
 }

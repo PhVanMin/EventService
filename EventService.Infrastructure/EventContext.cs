@@ -1,4 +1,5 @@
-﻿using EventService.Domain.AggregateModels.BrandAggregate;
+﻿using EventService.Domain.AggregateModels;
+using EventService.Domain.AggregateModels.BrandAggregate;
 using EventService.Domain.AggregateModels.EventAggregate;
 using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Infrastructure.EntityConfigurations;
@@ -12,21 +13,20 @@ namespace EventService.Infrastructure;
 
 public class EventContext : DbContext {
     public virtual DbSet<Brand> Brands { get; set; }
-
     public virtual DbSet<Event> Events { get; set; }
-
     public virtual DbSet<Voucher> Vouchers { get; set; }
+    public virtual DbSet<EventVoucher> EventVoucher { get; set; }
+
+    private IMediator _mediator;
+    private IDbContextTransaction? _currentTransaction;
+    public IDbContextTransaction? GetCurrentTransaction() => _currentTransaction;
+    public bool HasActiveTransaction => _currentTransaction != null;
 
     public EventContext(DbContextOptions<EventContext> options, IMediator mediator)
         : base(options) {
         _mediator = mediator;
         Database.Migrate();
     }
-
-    private IMediator _mediator;
-    private IDbContextTransaction? _currentTransaction;
-    public IDbContextTransaction? GetCurrentTransaction() => _currentTransaction;
-    public bool HasActiveTransaction => _currentTransaction != null;
 
     public async Task<IDbContextTransaction?> BeginTransactionAsync() {
         if (_currentTransaction != null) return null;
@@ -100,5 +100,6 @@ public class EventContext : DbContext {
         modelBuilder.ApplyConfiguration(new EventEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new ClientRequestEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new EventVoucherConfiguration());
     }
 }
