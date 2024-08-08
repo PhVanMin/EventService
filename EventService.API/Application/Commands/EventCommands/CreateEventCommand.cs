@@ -9,15 +9,6 @@ namespace EventService.API.Application.Commands.EventCommands {
         DateTime start,
         DateTime end,
         int gameId,
-        List<VoucherDTO> vouchers
+        List<int> voucherIds
     ) : IRequest<bool>;
-
-    public record VoucherDTO {
-        public string Code = null!;
-        public string Image = null!;
-        public int Value;
-        public string Description = null!;
-        public DateTime ExpireDate;
-        public int Status;
-    }
 }

@@ -2,32 +2,43 @@
 {
     public record BrandVM
     {
-        public int Id;
-        public string Name = null!;
-        public string Field = null!;
-        public string Address = null!;
-        public string Gps = null!;
-        public int Status;
+        public int Id { get; init; }
+        public string Name { get; set; } = null!;
+        public string Field { get; set; } = null!;
+        public string Address { get; set; } = null!;
+        public string Gps { get; set; } = null!;
+        public int Status { get; set; }
     }
 
     public record EventVM
     {
-        public int Id;
-        public string Name = null!;
-        public string Image = null!;
-        public int NoVoucher;
-        public DateTime StartDate;
-        public DateTime EndDate;
-        public int? GameId;
+        public int Id { get; set; }
+        public string Name { get; set; } = null!;
+        public string Image { get; set; } = null!;
+        public int NoVoucher { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int? GameId { get; set; }
+    }
+
+    public record EventWithVoucherVM {
+        public int Id { get; set; }
+        public string Name { get; set; } = null!;
+        public string Image { get; set; } = null!;
+        public int NoVoucher { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int? GameId { get; set; }
+        public List<VoucherVM> Vouchers { get; set; } = new List<VoucherVM>();
     }
 
     public record VoucherVM {
-        public int Id;
-        public string Code = null!;
-        public string Image = null!;
-        public int Value;
-        public string Description = null!;
-        public DateTime ExpireDate;
-        public int Status;
+        public int Id { get; set; }
+        public string Code { get; set; } = null!;
+        public string Image { get; set; } = null!;
+        public int Value { get; set; }
+        public string Description { get; set; } = null!;
+        public int ExpireDate { get; set; }
+        public int Status { get; set; }
     }
 }

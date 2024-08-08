@@ -16,6 +16,26 @@ namespace EventService.API.Controllers {
             _services = services;
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetEventWithVouchers(int id) {
+            try {
+                var @event = await _services.Queries.GetEventWithVoucher(id);
+                return Ok(@event);
+            } catch {
+                return NotFound();
+            }
+        }
+
+        [HttpGet("{id}/Vouchers")]
+        public async Task<IActionResult> GetEventVouchers(int id) {
+            try {
+                var vouchers = await _services.Queries.GetEventVoucher(id);
+                return Ok(vouchers);
+            } catch {
+                return NotFound();
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBrandEvent(int id, UpdateEventRequest request) {
             var command = new UpdateEventCommand(

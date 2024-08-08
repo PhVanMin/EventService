@@ -1,6 +1,7 @@
 ﻿using EventService.Infrastructure;
 using EventService.Infrastructure.Idempotency;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventService.API.Application.Commands.EventCommands
 {
@@ -19,14 +20,17 @@ namespace EventService.API.Application.Commands.EventCommands
         }
         public async Task<bool> Handle(CreateEventCommand request, CancellationToken cancellationToken)
         {
-            var brand = await _context.Brands.FindAsync(request.brandId);
+            var brand = await _context.Brands
+                .Include(b => b.Events)
+                .FirstOrDefaultAsync(b => b.Id == request.brandId);
+
             if (brand == null)
                 return false;
 
-            brand.AddEvent(request.name, request.image, request.noVoucher, request.start, request.end, request.gameId);
-            foreach(var voucher in request.vouchers) {
-                brand.AddVoucher(voucher.Code, voucher.Image, voucher.Value, voucher.Description, voucher.ExpireDate, voucher.Status);
-            }
+            if (brand.Events.FirstOrDefault(e => e.Name == request.name) != null)
+                return false;
+
+            brand.AddEvent(request.name, request.image, request.noVoucher, request.start, request.end, request.gameId, request.voucherIds);
             _logger.LogInformation("Adding Event to Brand - Event: {@Event}", brand.Events.Last());
 
             return await _context.SaveEntitiesAsync(cancellationToken);

@@ -19,7 +19,7 @@ public class Brand : Entity, IAggregateRoot {
 
     private List<Event> _events;
     public IReadOnlyCollection<Event> Events => _events.AsReadOnly();
-    
+
     private List<Voucher> _vouchers;
     public IReadOnlyCollection<Voucher> Vouchers => _vouchers.AsReadOnly();
 
@@ -34,13 +34,8 @@ public class Brand : Entity, IAggregateRoot {
         Status = status;
     }
 
-    public void AddEvent(string name, string image, int noVoucher, DateTime start, DateTime end, int gameId) {
-        var @event = _events.FirstOrDefault(e => e.Name == name);
-        if (@event != null) {
-            throw new EventDomainException($"Event with name \"{name}\" already exists.");
-        }
-
-        @event = new Event() {
+    public void AddEvent(string name, string image, int noVoucher, DateTime start, DateTime end, int gameId, List<int> voucherIds) {
+        var @event = new Event() {
             Name = name,
             Image = image,
             NoVoucher = noVoucher,
@@ -49,9 +44,13 @@ public class Brand : Entity, IAggregateRoot {
             GameId = gameId
         };
 
+        foreach (var voucherId in voucherIds) {
+            @event.AddVoucher(voucherId);
+        }
+
         _events.Add(@event);
     }
-    public void AddVoucher(string code, string image, int value, string description, DateTime expireDate, int status) {
+    public void AddVoucher(string code, string image, int value, string description, int expireDate, int status) {
         var voucher = _vouchers.FirstOrDefault(v => v.Code == code);
         if (voucher != null)
             throw new EventDomainException("Voucher already exists.");

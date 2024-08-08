@@ -1,7 +1,9 @@
 ﻿using EventService.API.Application.Commands;
+using EventService.API.Application.Commands.EventCommands;
 using EventService.API.Application.Commands.VoucherCommands;
 using EventService.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using static EventService.API.Controllers.EventsController;
 
 namespace EventService.API.Controllers {
     [Route("api/[controller]")]
@@ -36,5 +38,39 @@ namespace EventService.API.Controllers {
                 return BadRequest();
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBrandEvent(int id, UpdateVoucherRequest request) {
+            var command = new UpdateVoucherCommand(
+                id, request.image, request.value, 
+                request.expireDate, request.status);
+
+            var updateVoucherOrder = new IdentifiedCommand<UpdateVoucherCommand, bool>(command, Guid.NewGuid());
+
+            _services.Logger.LogInformation(
+                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+                updateVoucherOrder.GetType().Name,
+                nameof(updateVoucherOrder.Id),
+                updateVoucherOrder.Id,
+                updateVoucherOrder
+            );
+
+            var result = await _services.Mediator.Send(updateVoucherOrder);
+
+            if (result) {
+                _services.Logger.LogInformation("UpdateVoucherRequest succeeded");
+                return NoContent();
+            } else {
+                _services.Logger.LogWarning("UpdateVoucherRequest failed");
+                return BadRequest();
+            }
+        }
+
+        public record UpdateVoucherRequest(
+            string image,
+            int value,
+            int expireDate,
+            int status
+        );
     }
 }

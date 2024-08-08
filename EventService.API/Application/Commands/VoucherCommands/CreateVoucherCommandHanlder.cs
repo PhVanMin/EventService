@@ -20,7 +20,10 @@ namespace EventService.API.Application.Commands.VoucherCommands {
             if (brand == null)
                 return false;
 
-            brand.AddVoucher(request.Code, request.Image, request.Value, request.Description, request.ExpireDate, request.Status);
+            var guid = Guid.NewGuid();
+            var voucherCode = guid.ToString().Substring(0, 9);
+
+            brand.AddVoucher(voucherCode, request.Image, request.Value, request.Description, request.ExpireDate, request.Status);
             _logger.LogInformation("Creating Voucher for Brand - Voucher: {@voucher}", brand.Vouchers.Last());
 
             return await _context.SaveEntitiesAsync(cancellationToken);

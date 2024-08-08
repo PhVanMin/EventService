@@ -136,8 +136,8 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<DateTime>("ExpireDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<int>("ExpireDate")
+                        .HasColumnType("integer")
                         .HasColumnName("expire_date");
 
                     b.Property<string>("Image")

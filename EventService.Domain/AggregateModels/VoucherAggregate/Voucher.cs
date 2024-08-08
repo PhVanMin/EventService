@@ -12,7 +12,7 @@ public class Voucher : Entity, IAggregateRoot {
 
     public string Description { get; set; } = null!;
 
-    public DateTime ExpireDate { get; set; }
+    public int ExpireDate { get; set; }
 
     public int Status { get; set; }
 
@@ -27,7 +27,7 @@ public class Voucher : Entity, IAggregateRoot {
         _events = new List<EventVoucher>();
     }
 
-    public void Update(string image, int value, string description, DateTime expireDate, int status) {
+    public void Update(string image, int value, string description, int expireDate, int status) {
         Image = image;
         Value = value;
         Description = description;

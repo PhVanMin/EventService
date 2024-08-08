@@ -39,14 +39,14 @@ public class Event : Entity, IAggregateRoot {
         GameId = gameId;
     }
 
-    public void AddVoucher(Voucher voucher) {
-        var newVoucher = _vouchers.FirstOrDefault(v => v.VoucherId == voucher.Id);
+    public void AddVoucher(int voucherId) {
+        var newVoucher = _vouchers.FirstOrDefault(v => v.VoucherId == voucherId);
         if (newVoucher != null)
             throw new EventDomainException("Voucher already exists.");
 
         _vouchers.Add(new EventVoucher {
             EventId = Id,
-            VoucherId = voucher.Id
+            VoucherId = voucherId
         });
     }
 

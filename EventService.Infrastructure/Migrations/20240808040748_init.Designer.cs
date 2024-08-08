@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventService.Infrastructure.Migrations
 {
     [DbContext(typeof(EventContext))]
-    [Migration("20240715150803_add-valueobject")]
-    partial class addvalueobject
+    [Migration("20240808040748_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace EventService.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("EventService.Domain.Model.Brand", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.BrandAggregate.Brand", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,7 +54,7 @@ namespace EventService.Infrastructure.Migrations
                     b.ToTable("brand", (string)null);
                 });
 
-            modelBuilder.Entity("EventService.Domain.Model.Event", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.EventAggregate.Event", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -101,7 +101,22 @@ namespace EventService.Infrastructure.Migrations
                     b.ToTable("event", (string)null);
                 });
 
-            modelBuilder.Entity("EventService.Domain.Model.Voucher", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.EventVoucher", b =>
+                {
+                    b.Property<int>("EventId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("VoucherId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("EventId", "VoucherId");
+
+                    b.HasIndex("VoucherId");
+
+                    b.ToTable("brand_voucher", (string)null);
+                });
+
+            modelBuilder.Entity("EventService.Domain.AggregateModels.VoucherAggregate.Voucher", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -109,6 +124,10 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("integer")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -120,12 +139,8 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<int>("EventId")
+                    b.Property<int>("ExpireDate")
                         .HasColumnType("integer")
-                        .HasColumnName("event_id");
-
-                    b.Property<DateTime>("ExpireDate")
-                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("expire_date");
 
                     b.Property<string>("Image")
@@ -144,7 +159,7 @@ namespace EventService.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("voucher_pkey");
 
-                    b.HasIndex("EventId");
+                    b.HasIndex("BrandId");
 
                     b.ToTable("voucher", (string)null);
                 });
@@ -167,9 +182,9 @@ namespace EventService.Infrastructure.Migrations
                     b.ToTable("requests", (string)null);
                 });
 
-            modelBuilder.Entity("EventService.Domain.Model.Brand", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.BrandAggregate.Brand", b =>
                 {
-                    b.OwnsOne("EventService.Domain.Models.Location", "Location", b1 =>
+                    b.OwnsOne("EventService.Domain.AggregateModels.BrandAggregate.Location", "Location", b1 =>
                         {
                             b1.Property<int>("BrandId")
                                 .HasColumnType("integer");
@@ -196,9 +211,9 @@ namespace EventService.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("EventService.Domain.Model.Event", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.EventAggregate.Event", b =>
                 {
-                    b.HasOne("EventService.Domain.Model.Brand", "Brand")
+                    b.HasOne("EventService.Domain.AggregateModels.BrandAggregate.Brand", "Brand")
                         .WithMany("Events")
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -207,25 +222,51 @@ namespace EventService.Infrastructure.Migrations
                     b.Navigation("Brand");
                 });
 
-            modelBuilder.Entity("EventService.Domain.Model.Voucher", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.EventVoucher", b =>
                 {
-                    b.HasOne("EventService.Domain.Model.Event", "Event")
-                        .WithMany("Vouchers")
+                    b.HasOne("EventService.Domain.AggregateModels.EventAggregate.Event", "Event")
+                        .WithMany("EventVouchers")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("EventService.Domain.AggregateModels.VoucherAggregate.Voucher", "Voucher")
+                        .WithMany("EventVouchers")
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Event");
+
+                    b.Navigation("Voucher");
                 });
 
-            modelBuilder.Entity("EventService.Domain.Model.Brand", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.VoucherAggregate.Voucher", b =>
+                {
+                    b.HasOne("EventService.Domain.AggregateModels.BrandAggregate.Brand", "Brand")
+                        .WithMany("Vouchers")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
+            modelBuilder.Entity("EventService.Domain.AggregateModels.BrandAggregate.Brand", b =>
                 {
                     b.Navigation("Events");
+
+                    b.Navigation("Vouchers");
                 });
 
-            modelBuilder.Entity("EventService.Domain.Model.Event", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.EventAggregate.Event", b =>
                 {
-                    b.Navigation("Vouchers");
+                    b.Navigation("EventVouchers");
+                });
+
+            modelBuilder.Entity("EventService.Domain.AggregateModels.VoucherAggregate.Voucher", b =>
+                {
+                    b.Navigation("EventVouchers");
                 });
 #pragma warning restore 612, 618
         }

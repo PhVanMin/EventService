@@ -1,4 +1,5 @@
-﻿using EventService.Infrastructure;
+﻿using EventService.Domain.AggregateModels.BrandAggregate;
+using EventService.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventService.API.Application.Queries {
@@ -20,7 +21,6 @@ namespace EventService.API.Application.Queries {
 
         public async Task<BrandVM> GetBrand(int id) {
             var brand = await context.Brands
-                .Include(e => e.Events)
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (brand == null)
@@ -49,6 +49,38 @@ namespace EventService.API.Application.Queries {
                     Status = e.Status
                 })
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<VoucherVM>> GetEventVoucher(int id) {
+            return await context.EventVoucher
+                .Where(ev => ev.EventId == id)
+                .Select(e => new VoucherVM {
+                Id = e.Voucher.Id,
+                Code = e.Voucher.Code,
+                Image = e.Voucher.Image,
+                Value = e.Voucher.Value,
+                Description = e.Voucher.Description,
+                ExpireDate = e.Voucher.ExpireDate,
+                Status = e.Voucher.Status
+            }).ToListAsync();
+        }
+
+        public async Task<EventWithVoucherVM> GetEventWithVoucher(int id) {
+            var @event = await context.Events.FirstOrDefaultAsync(e => e.Id == id);
+            if (@event == null)
+                throw new KeyNotFoundException();
+
+            var eventVouchers = await GetEventVoucher(id);
+            return new EventWithVoucherVM {
+                Id = @event.Id,
+                Name = @event.Name,
+                EndDate = @event.EndDate,
+                GameId = @event.GameId,
+                Image = @event.Image,
+                NoVoucher = @event.NoVoucher,
+                StartDate = @event.StartDate,
+                Vouchers = eventVouchers as List<VoucherVM> ?? new List<VoucherVM>()
+            };
         }
     }
 }
