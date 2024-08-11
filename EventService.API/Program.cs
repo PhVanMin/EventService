@@ -1,7 +1,9 @@
 using EventService.API.Extensions;
+using EventService.API.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddGrpc();
 builder.Services.AddSwaggerGen();
 builder.AddApplicationServices();
 builder.AddLoggingServices();
@@ -30,5 +32,6 @@ app.UseAuthorization();
 
 // TODO: maybe add versioning idk?
 app.MapControllers();
+app.MapGrpcService<GreeterService>();
 
 app.Run();
