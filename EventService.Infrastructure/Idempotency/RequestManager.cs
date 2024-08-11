@@ -28,7 +28,6 @@ namespace EventService.Infrastructure.Idempotency {
                 };
 
             _context.Add(request);
-
             await _context.SaveChangesAsync();
         }
     }

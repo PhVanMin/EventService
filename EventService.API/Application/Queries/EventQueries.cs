@@ -41,7 +41,6 @@ namespace EventService.API.Application.Queries {
                 .Where(v => v.BrandId == id)
                 .Select(e => new VoucherVM {
                     Id = e.Id,
-                    Code = e.Code,
                     Image = e.Image,
                     Value = e.Value,
                     Description = e.Description,
@@ -56,7 +55,6 @@ namespace EventService.API.Application.Queries {
                 .Where(ev => ev.EventId == id)
                 .Select(e => new VoucherVM {
                 Id = e.Voucher.Id,
-                Code = e.Voucher.Code,
                 Image = e.Voucher.Image,
                 Value = e.Voucher.Value,
                 Description = e.Voucher.Description,

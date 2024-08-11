@@ -34,7 +34,6 @@
 
     public record VoucherVM {
         public int Id { get; set; }
-        public string Code { get; set; } = null!;
         public string Image { get; set; } = null!;
         public int Value { get; set; }
         public string Description { get; set; } = null!;

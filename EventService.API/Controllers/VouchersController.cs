@@ -40,9 +40,9 @@ namespace EventService.API.Controllers {
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBrandEvent(int id, UpdateVoucherRequest request) {
+        public async Task<IActionResult> UpdateBrandVoucher(int id, UpdateVoucherRequest request) {
             var command = new UpdateVoucherCommand(
-                id, request.image, request.value, 
+                id, request.image, request.description, request.value,
                 request.expireDate, request.status);
 
             var updateVoucherOrder = new IdentifiedCommand<UpdateVoucherCommand, bool>(command, Guid.NewGuid());
@@ -69,6 +69,7 @@ namespace EventService.API.Controllers {
         public record UpdateVoucherRequest(
             string image,
             int value,
+            string description,
             int expireDate,
             int status
         );

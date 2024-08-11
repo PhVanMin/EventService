@@ -1,8 +1,8 @@
 ﻿using EventService.Domain.AggregateModels.BrandAggregate;
-using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Domain.Exceptions;
 using EventService.Domain.Interfaces;
 using EventService.Domain.SeedWork;
+using MediatR;
 
 namespace EventService.Domain.AggregateModels.EventAggregate;
 
@@ -24,19 +24,23 @@ public class Event : Entity, IAggregateRoot {
     public Brand Brand { get; set; } = null!;
 
     private List<EventVoucher> _vouchers;
-    public IReadOnlyCollection<EventVoucher> EventVouchers => _vouchers.AsReadOnly();
+    public IReadOnlyCollection<EventVoucher> Vouchers => _vouchers.AsReadOnly();
 
     public Event() {
         _vouchers = new List<EventVoucher>();
     }
 
-    public void Update(string name, string image, int noVoucher, DateTime start, DateTime end, int gameId) {
+    public void Update(string name, string image, int noVoucher, DateTime start, DateTime end, int gameId, List<int> voucherIds) {
         Name = name;
         Image = image;
         NoVoucher = noVoucher;
         StartDate = start;
         EndDate = end;
         GameId = gameId;
+
+        _vouchers.Clear();
+        foreach (var voucherId in voucherIds)
+            AddVoucher(voucherId);
     }
 
     public void AddVoucher(int voucherId) {
@@ -48,12 +52,5 @@ public class Event : Entity, IAggregateRoot {
             EventId = Id,
             VoucherId = voucherId
         });
-    }
-
-    public void UpdateVouchers(List<Voucher> vouchers) {
-        _vouchers = vouchers.Select(v => new EventVoucher {
-            EventId = Id,
-            VoucherId = v.Id
-        }).ToList();
     }
 }

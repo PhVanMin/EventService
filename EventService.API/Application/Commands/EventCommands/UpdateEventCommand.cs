@@ -10,6 +10,7 @@ namespace EventService.API.Application.Commands.EventCommands
         int noVoucher,
         DateTime start,
         DateTime end,
-        int gameId
+        int gameId,
+        List<int> voucherIds
     ) : IRequest<bool>;
 }

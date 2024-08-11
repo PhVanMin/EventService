@@ -4,8 +4,6 @@ using EventService.Domain.SeedWork;
 
 namespace EventService.Domain.AggregateModels.VoucherAggregate;
 public class Voucher : Entity, IAggregateRoot {
-    public string Code { get; set; } = null!;
-
     public string Image { get; set; } = null!;
 
     public int Value { get; set; }
@@ -21,7 +19,7 @@ public class Voucher : Entity, IAggregateRoot {
     public Brand Brand { get; set; } = null!;
 
     private List<EventVoucher> _events;
-    public IReadOnlyCollection<EventVoucher> EventVouchers => _events.AsReadOnly();
+    public IReadOnlyCollection<EventVoucher> Events => _events.AsReadOnly();
 
     public Voucher() {
         _events = new List<EventVoucher>();

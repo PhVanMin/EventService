@@ -50,20 +50,13 @@ public class Brand : Entity, IAggregateRoot {
 
         _events.Add(@event);
     }
-    public void AddVoucher(string code, string image, int value, string description, int expireDate, int status) {
-        var voucher = _vouchers.FirstOrDefault(v => v.Code == code);
-        if (voucher != null)
-            throw new EventDomainException("Voucher already exists.");
-
-        voucher = new Voucher() {
-            Code = code,
+    public void AddVoucher(string image, int value, string description, int expireDate, int status) {
+        _vouchers.Add(new Voucher() {
             Image = image,
             Value = value,
             Description = description,
             ExpireDate = expireDate,
             Status = status
-        };
-
-        _vouchers.Add(voucher);
+        });
     }
 }
