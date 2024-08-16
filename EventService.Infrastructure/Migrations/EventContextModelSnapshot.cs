@@ -86,6 +86,9 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("no_voucher");
 
+                    b.Property<int>("RedeemVoucherCount")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_date");
@@ -95,10 +98,27 @@ namespace EventService.Infrastructure.Migrations
 
                     b.HasIndex("BrandId");
 
+                    b.HasIndex("GameId");
+
                     b.ToTable("event", (string)null);
                 });
 
-            modelBuilder.Entity("EventService.Domain.AggregateModels.EventVoucher", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.EventAggregate.EventPlayer", b =>
+                {
+                    b.Property<int>("EventId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("EventId", "PlayerId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("event_player", (string)null);
+                });
+
+            modelBuilder.Entity("EventService.Domain.AggregateModels.EventAggregate.EventVoucher", b =>
                 {
                     b.Property<int>("EventId")
                         .HasColumnType("integer");
@@ -110,7 +130,104 @@ namespace EventService.Infrastructure.Migrations
 
                     b.HasIndex("VoucherId");
 
-                    b.ToTable("brand_voucher", (string)null);
+                    b.ToTable("event_voucher", (string)null);
+                });
+
+            modelBuilder.Entity("EventService.Domain.AggregateModels.GameAggregate.Game", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("image");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("game_pkey");
+
+                    b.ToTable("game", (string)null);
+                });
+
+            modelBuilder.Entity("EventService.Domain.AggregateModels.PlayerAggregate.Player", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("email");
+
+                    b.Property<DateTime>("LastAccessed")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_accessed");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("player_pkey");
+
+                    b.ToTable("player", (string)null);
+                });
+
+            modelBuilder.Entity("EventService.Domain.AggregateModels.VoucherAggregate.RedeemVoucher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BaseVoucherId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EventId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ExpireDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expire_date");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RedeemCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("RedeemTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("redeem_time");
+
+                    b.HasKey("Id")
+                        .HasName("redeem_voucher_pkey");
+
+                    b.HasIndex("BaseVoucherId");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("redeem_voucher", (string)null);
                 });
 
             modelBuilder.Entity("EventService.Domain.AggregateModels.VoucherAggregate.Voucher", b =>
@@ -125,6 +242,9 @@ namespace EventService.Infrastructure.Migrations
                     b.Property<int>("BrandId")
                         .HasColumnType("integer")
                         .HasColumnName("brand_id");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -211,10 +331,35 @@ namespace EventService.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("EventService.Domain.AggregateModels.GameAggregate.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId");
+
                     b.Navigation("Brand");
+
+                    b.Navigation("Game");
                 });
 
-            modelBuilder.Entity("EventService.Domain.AggregateModels.EventVoucher", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.EventAggregate.EventPlayer", b =>
+                {
+                    b.HasOne("EventService.Domain.AggregateModels.EventAggregate.Event", "Event")
+                        .WithMany("Players")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EventService.Domain.AggregateModels.PlayerAggregate.Player", "Player")
+                        .WithMany("Events")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("EventService.Domain.AggregateModels.EventAggregate.EventVoucher", b =>
                 {
                     b.HasOne("EventService.Domain.AggregateModels.EventAggregate.Event", "Event")
                         .WithMany("Vouchers")
@@ -223,7 +368,7 @@ namespace EventService.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("EventService.Domain.AggregateModels.VoucherAggregate.Voucher", "Voucher")
-                        .WithMany("Events")
+                        .WithMany()
                         .HasForeignKey("VoucherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -231,6 +376,33 @@ namespace EventService.Infrastructure.Migrations
                     b.Navigation("Event");
 
                     b.Navigation("Voucher");
+                });
+
+            modelBuilder.Entity("EventService.Domain.AggregateModels.VoucherAggregate.RedeemVoucher", b =>
+                {
+                    b.HasOne("EventService.Domain.AggregateModels.VoucherAggregate.Voucher", "BaseVoucher")
+                        .WithMany()
+                        .HasForeignKey("BaseVoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EventService.Domain.AggregateModels.EventAggregate.Event", "Event")
+                        .WithMany("RedeemVouchers")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EventService.Domain.AggregateModels.PlayerAggregate.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BaseVoucher");
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("EventService.Domain.AggregateModels.VoucherAggregate.Voucher", b =>
@@ -253,10 +425,14 @@ namespace EventService.Infrastructure.Migrations
 
             modelBuilder.Entity("EventService.Domain.AggregateModels.EventAggregate.Event", b =>
                 {
+                    b.Navigation("Players");
+
+                    b.Navigation("RedeemVouchers");
+
                     b.Navigation("Vouchers");
                 });
 
-            modelBuilder.Entity("EventService.Domain.AggregateModels.VoucherAggregate.Voucher", b =>
+            modelBuilder.Entity("EventService.Domain.AggregateModels.PlayerAggregate.Player", b =>
                 {
                     b.Navigation("Events");
                 });

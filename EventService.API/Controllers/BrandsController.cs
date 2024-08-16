@@ -45,6 +45,16 @@ namespace EventService.API.Controllers {
             }
         }
 
+        [HttpGet("{id}/Redeem")]
+        public async Task<ActionResult<IEnumerable<VoucherVM>>> GetRedeemVouchersByBrandId(int id) {
+            try {
+                var vouchers = await _services.Queries.GetBrandVoucher(id);
+                return Ok(vouchers);
+            } catch {
+                return NotFound();
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBrand(int id, UpdateBrandRequest request) {
             var command = new UpdateBrandCommand(id, request.Name, request.Field, request.Status);

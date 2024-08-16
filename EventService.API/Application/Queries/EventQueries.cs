@@ -1,5 +1,4 @@
-﻿using EventService.Domain.AggregateModels.BrandAggregate;
-using EventService.Infrastructure;
+﻿using EventService.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventService.API.Application.Queries {
@@ -54,21 +53,20 @@ namespace EventService.API.Application.Queries {
             return await context.EventVoucher
                 .Where(ev => ev.EventId == id)
                 .Select(e => new VoucherVM {
-                Id = e.Voucher.Id,
-                Image = e.Voucher.Image,
-                Value = e.Voucher.Value,
-                Description = e.Voucher.Description,
-                ExpireDate = e.Voucher.ExpireDate,
-                Status = e.Voucher.Status
-            }).ToListAsync();
+                    Id = e.Voucher.Id,
+                    Image = e.Voucher.Image,
+                    Value = e.Voucher.Value,
+                    Description = e.Voucher.Description,
+                    ExpireDate = e.Voucher.ExpireDate,
+                    Status = e.Voucher.Status
+                }).ToListAsync();
         }
 
         public async Task<EventWithVoucherVM> GetEventWithVoucher(int id) {
-            var @event = await context.Events.FirstOrDefaultAsync(e => e.Id == id);
+            var @event = await context.Events.Include(e => e.Vouchers).FirstOrDefaultAsync(e => e.Id == id);
             if (@event == null)
                 throw new KeyNotFoundException();
 
-            var eventVouchers = await GetEventVoucher(id);
             return new EventWithVoucherVM {
                 Id = @event.Id,
                 Name = @event.Name,
@@ -77,8 +75,81 @@ namespace EventService.API.Application.Queries {
                 Image = @event.Image,
                 NoVoucher = @event.NoVoucher,
                 StartDate = @event.StartDate,
-                Vouchers = eventVouchers as List<VoucherVM> ?? new List<VoucherVM>()
+                Vouchers = @event.Vouchers.Select(ev => new VoucherVM {
+                    Id = ev.Voucher.Id,
+                    Image = ev.Voucher.Image,
+                    Value = ev.Voucher.Value,
+                    Description = ev.Voucher.Description,
+                    ExpireDate = ev.Voucher.ExpireDate,
+                    Status = ev.Voucher.Status
+                }).ToList(),
             };
+        }
+
+        public async Task<IEnumerable<RedeemVoucherVM>> GetBrandRedeemVoucher(int id) {
+            return await context.RedeemVouchers
+                .Where(e => e.Event.BrandId == id)
+                .Select(e => new RedeemVoucherVM {
+                    Id = e.Id,
+                    Image = e.BaseVoucher.Image,
+                    Description = e.BaseVoucher.Description,
+                    ExpireDate = e.ExpireDate,
+                    RedeemCode = e.RedeemCode,
+                    RedeemTime = e.RedeemTime,
+                    Value = e.BaseVoucher.Value
+                }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<PlayerVM>> GetBrandPlayer(int id) {
+            return await context.EventPlayer
+                .Where(e => e.Event.BrandId == id)
+                .Select(e => new PlayerVM {
+                    Email = e.Player.Email,
+                    Name = e.Player.Name,
+                }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<PlayerVM>> GetBrandPlayerByDate(int id, DateTime start, DateTime end) {
+            return await context.EventPlayer
+                .Where(e => e.Event.BrandId == id 
+                    && (e.Player.LastAccessed >= start && e.Player.LastAccessed < end))
+                .Select(e => new PlayerVM {
+                    Email = e.Player.Email,
+                    Name = e.Player.Name,
+                }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<RedeemVoucherVM>> GetEventRedeemVoucher(int id) {
+            return await context.RedeemVouchers
+                .Where(e => e.EventId == id)
+                .Select(e => new RedeemVoucherVM {
+                    Id = e.Id,
+                    Image = e.BaseVoucher.Image,
+                    Description = e.BaseVoucher.Description,
+                    ExpireDate = e.ExpireDate,
+                    RedeemCode = e.RedeemCode,
+                    RedeemTime = e.RedeemTime,
+                    Value = e.BaseVoucher.Value
+                }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<PlayerVM>> GetEventPlayer(int id) {
+            return await context.EventPlayer
+                .Where(e => e.EventId == id)
+                .Select(e => new PlayerVM {
+                    Email = e.Player.Email,
+                    Name = e.Player.Name,
+                }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<GameVM>> GetGame() {
+            return await context.Games
+                .Select(e => new GameVM {
+                    Id = e.Id,
+                    Name = e.Name,
+                    Image = e.Image,
+                })
+                .ToListAsync();
         }
     }
 }

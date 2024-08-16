@@ -50,7 +50,7 @@ namespace EventService.API.Application.Commands {
 
                     return result;
                 } catch {
-                    return default;
+                    return default!;
                 }
             }
         }

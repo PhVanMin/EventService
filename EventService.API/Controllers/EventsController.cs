@@ -1,5 +1,7 @@
 ﻿using EventService.API.Application.Commands;
 using EventService.API.Application.Commands.EventCommands;
+using EventService.API.Application.Commands.VoucherCommands;
+using EventService.API.Application.Queries;
 using EventService.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,16 +21,6 @@ namespace EventService.API.Controllers {
             try {
                 var @event = await _services.Queries.GetEventWithVoucher(id);
                 return Ok(@event);
-            } catch {
-                return NotFound();
-            }
-        }
-
-        [HttpGet("{id}/Vouchers")]
-        public async Task<IActionResult> GetEventVouchers(int id) {
-            try {
-                var vouchers = await _services.Queries.GetEventVoucher(id);
-                return Ok(vouchers);
             } catch {
                 return NotFound();
             }
@@ -82,6 +74,60 @@ namespace EventService.API.Controllers {
                 return Ok();
             } else {
                 _services.Logger.LogWarning("CreateEventCommand failed");
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("{id}/Vouchers")]
+        public async Task<IActionResult> GetEventVouchers(int id) {
+            try {
+                var vouchers = await _services.Queries.GetEventVoucher(id);
+                return Ok(vouchers);
+            } catch {
+                return NotFound();
+            }
+        }
+
+        [HttpPost("{id}/Redeem")]
+        public async Task<IActionResult> CreateRedeemVoucher(int id, CreateRedeemVoucherCommand command) {
+            var createRedeemVoucherOrder = new IdentifiedCommand<CreateRedeemVoucherCommand, RedeemVoucherVM?>(command, Guid.NewGuid());
+
+            _services.Logger.LogInformation(
+                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+                createRedeemVoucherOrder.GetType().Name,
+                nameof(createRedeemVoucherOrder.Id),
+                createRedeemVoucherOrder.Id,
+                createRedeemVoucherOrder
+            );
+
+            var result = await _services.Mediator.Send(createRedeemVoucherOrder);
+            if (result != null) {
+                _services.Logger.LogInformation("CreateRedeemVoucherCommand succeeded");
+                return Ok(result);
+            } else {
+                _services.Logger.LogWarning("CreateRedeemVoucherCommand failed");
+                return BadRequest();
+            }
+        }
+
+        [HttpPut("{id}/Redeem")]
+        public async Task<IActionResult> RedeemVoucher(int id, RedeemVoucherCommand command) {
+            var redeemVoucherOrder = new IdentifiedCommand<RedeemVoucherCommand, bool>(command, Guid.NewGuid());
+
+            _services.Logger.LogInformation(
+                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
+                redeemVoucherOrder.GetType().Name,
+                nameof(redeemVoucherOrder.Id),
+                redeemVoucherOrder.Id,
+                redeemVoucherOrder
+            );
+
+            var result = await _services.Mediator.Send(redeemVoucherOrder);
+            if (result) {
+                _services.Logger.LogInformation("RedeemVoucherCommand succeeded");
+                return Ok();
+            } else {
+                _services.Logger.LogWarning("RedeemVoucherCommand failed");
                 return BadRequest();
             }
         }

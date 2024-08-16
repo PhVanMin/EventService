@@ -40,4 +40,25 @@
         public int ExpireDate { get; set; }
         public int Status { get; set; }
     }
+
+    public record GameVM {
+        public int Id { get; set; }
+        public string Image { get; set; } = null!;
+        public string Name { get; set; } = null!;
+    }
+
+    public record PlayerVM {
+        public string Name { get; set; } = null!;
+        public string Email { get; set; } = null!;
+    }
+
+    public record RedeemVoucherVM {
+        public int Id { get; set; }
+        public string Image { get; set; } = null!;
+        public int Value { get; set; }
+        public string Description { get; set; } = null!;
+        public string RedeemCode { get; set; } = null!;
+        public DateTime ExpireDate { get; set; }
+        public DateTime RedeemTime { get; set; }
+    }
 }

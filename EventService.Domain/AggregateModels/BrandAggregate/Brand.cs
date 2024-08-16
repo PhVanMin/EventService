@@ -1,6 +1,5 @@
 ﻿using EventService.Domain.AggregateModels.EventAggregate;
 using EventService.Domain.AggregateModels.VoucherAggregate;
-using EventService.Domain.Exceptions;
 using EventService.Domain.Interfaces;
 using EventService.Domain.SeedWork;
 using System.ComponentModel.DataAnnotations;
@@ -41,7 +40,7 @@ public class Brand : Entity, IAggregateRoot {
             NoVoucher = noVoucher,
             StartDate = start,
             EndDate = end,
-            GameId = gameId
+            GameId = gameId,
         };
 
         foreach (var voucherId in voucherIds) {
@@ -56,7 +55,8 @@ public class Brand : Entity, IAggregateRoot {
             Value = value,
             Description = description,
             ExpireDate = expireDate,
-            Status = status
+            Status = status,
+            CreatedDate = DateTime.Now,
         });
     }
 }

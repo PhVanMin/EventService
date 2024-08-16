@@ -1,6 +1,7 @@
-﻿using EventService.Domain.AggregateModels;
-using EventService.Domain.AggregateModels.BrandAggregate;
+﻿using EventService.Domain.AggregateModels.BrandAggregate;
 using EventService.Domain.AggregateModels.EventAggregate;
+using EventService.Domain.AggregateModels.GameAggregate;
+using EventService.Domain.AggregateModels.PlayerAggregate;
 using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Infrastructure.EntityConfigurations;
 using MediatR;
@@ -14,8 +15,12 @@ namespace EventService.Infrastructure;
 public class EventContext : DbContext {
     public virtual DbSet<Brand> Brands { get; set; }
     public virtual DbSet<Event> Events { get; set; }
-    public virtual DbSet<Voucher> Vouchers { get; set; }
     public virtual DbSet<EventVoucher> EventVoucher { get; set; }
+    public virtual DbSet<EventPlayer> EventPlayer { get; set; }
+    public virtual DbSet<Game> Games { get; set; }
+    public virtual DbSet<Player> Players { get; set; }
+    public virtual DbSet<Voucher> Vouchers { get; set; }
+    public virtual DbSet<RedeemVoucher> RedeemVouchers { get; set; }
 
     private IMediator _mediator;
     private IDbContextTransaction? _currentTransaction;
@@ -97,9 +102,13 @@ public class EventContext : DbContext {
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         modelBuilder.ApplyConfiguration(new BrandEntityTypeConfiguration());
-        modelBuilder.ApplyConfiguration(new EventEntityTypeConfiguration());
-        modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new ClientRequestEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new EventEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new EventVoucherConfiguration());
+        modelBuilder.ApplyConfiguration(new EventPlayerConfiguration());
+        modelBuilder.ApplyConfiguration(new GameEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new PlayerEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new RedeemVoucherEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
     }
 }

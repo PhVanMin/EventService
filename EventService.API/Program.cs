@@ -3,20 +3,9 @@ using EventService.API.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddGrpc();
-builder.Services.AddSwaggerGen();
 builder.AddApplicationServices();
 builder.AddLoggingServices();
-builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("AllowAll",
-            builder => builder
-                .AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod());
-    }
-);
-
+builder.AddAuthenticationServices();
 
 var app = builder.Build();
 
