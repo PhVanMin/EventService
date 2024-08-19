@@ -3,11 +3,13 @@ using EventService.API.Application.Commands.EventCommands;
 using EventService.API.Application.Commands.VoucherCommands;
 using EventService.API.Application.Queries;
 using EventService.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventService.API.Controllers {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class EventsController : ControllerBase {
         private readonly EventContext _context;
         private readonly EventAPIService _services;

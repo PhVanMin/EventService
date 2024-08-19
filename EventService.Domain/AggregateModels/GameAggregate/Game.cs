@@ -1,5 +1,4 @@
-﻿using EventService.Domain.AggregateModels.EventAggregate;
-using EventService.Domain.SeedWork;
+﻿using EventService.Domain.SeedWork;
 
 namespace EventService.Domain.AggregateModels.GameAggregate {
     public class Game : Entity {

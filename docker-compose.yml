@@ -7,5 +7,12 @@ services:
       context: .
       dockerfile: EventService.API/Dockerfile
 
+  identityservice.api:
+    image: ${DOCKER_REGISTRY-}identityserviceapi
+    build:
+      context: .
+      dockerfile: IdentityServer.Api/Dockerfile
+
 volumes:
   eventdb:
+  identitydb:

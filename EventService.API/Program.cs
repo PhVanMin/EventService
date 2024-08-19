@@ -4,7 +4,7 @@ using EventService.API.Grpc;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddApplicationServices();
-builder.AddLoggingServices();
+builder.ConfigurateLogging();
 builder.AddAuthenticationServices();
 
 var app = builder.Build();

@@ -2,11 +2,13 @@
 using EventService.API.Application.Commands.BrandCommands;
 using EventService.API.Application.Queries;
 using EventService.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventService.API.Controllers {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BrandsController : ControllerBase {
         private readonly EventContext _context;
         private readonly EventAPIService _services;

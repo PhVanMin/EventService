@@ -16,6 +16,7 @@ namespace EventService.Infrastructure.EntityConfigurations
             builder.Property(e => e.Description).HasColumnName("description");
             builder.Property(e => e.BrandId).HasColumnName("brand_id");
             builder.Property(e => e.ExpireDate).HasColumnName("expire_date");
+            builder.Property(e => e.CreatedDate).HasColumnName("created_date");
             builder.Property(e => e.Image).HasColumnName("image");
             builder.Property(e => e.Status).HasColumnName("status");
             builder.Property(e => e.Value).HasColumnName("value");

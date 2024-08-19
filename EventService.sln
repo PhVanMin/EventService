@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventService.Domain", "Even
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventService.Infrastructure", "EventService.Infrastructure\EventService.Infrastructure.csproj", "{B9D07FF6-8EF2-421C-B50B-0B05BA03852E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer.Api", "IdentityServer.Api\IdentityServer.Api.csproj", "{F61F81D8-B0E4-4411-8532-2A1AC923BBC6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{B9D07FF6-8EF2-421C-B50B-0B05BA03852E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9D07FF6-8EF2-421C-B50B-0B05BA03852E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9D07FF6-8EF2-421C-B50B-0B05BA03852E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F61F81D8-B0E4-4411-8532-2A1AC923BBC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F61F81D8-B0E4-4411-8532-2A1AC923BBC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F61F81D8-B0E4-4411-8532-2A1AC923BBC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F61F81D8-B0E4-4411-8532-2A1AC923BBC6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

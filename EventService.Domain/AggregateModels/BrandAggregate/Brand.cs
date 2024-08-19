@@ -33,7 +33,7 @@ public class Brand : Entity, IAggregateRoot {
         Status = status;
     }
 
-    public void AddEvent(string name, string image, int noVoucher, DateTime start, DateTime end, int gameId, List<int> voucherIds) {
+    public void AddEvent(string name, string image, int noVoucher, DateTime start, DateTime end, int? gameId, List<int> voucherIds) {
         var @event = new Event() {
             Name = name,
             Image = image,
@@ -56,7 +56,7 @@ public class Brand : Entity, IAggregateRoot {
             Description = description,
             ExpireDate = expireDate,
             Status = status,
-            CreatedDate = DateTime.Now,
+            CreatedDate = DateTime.UtcNow,
         });
     }
 }

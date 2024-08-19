@@ -32,11 +32,11 @@ namespace EventService.Domain.AggregateModels.VoucherAggregate {
                 throw new EventDomainException("Voucher already redeemed.");
             }
 
-            if (DateTime.Now > ExpireDate) {
+            if (DateTime.UtcNow > ExpireDate) {
                 throw new EventDomainException("Voucher expired.");
             }
 
-            RedeemTime = DateTime.Now;
+            RedeemTime = DateTime.UtcNow;
         }
     }
 }

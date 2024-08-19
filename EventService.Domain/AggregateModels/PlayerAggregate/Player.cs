@@ -17,12 +17,12 @@ namespace EventService.Domain.AggregateModels.PlayerAggregate
         public Player(string name, string email) : this() {
             Name = name;
             Email = email;
-            LastAccessed = DateTime.Now;
+            LastAccessed = DateTime.UtcNow;
         }
 
         public void UpdateLastAccess()
         {
-            LastAccessed = DateTime.Now;
+            LastAccessed = DateTime.UtcNow;
         }
     }
 }

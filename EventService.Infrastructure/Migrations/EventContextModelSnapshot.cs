@@ -244,7 +244,8 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnName("brand_id");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_date");
 
                     b.Property<string>("Description")
                         .IsRequired()

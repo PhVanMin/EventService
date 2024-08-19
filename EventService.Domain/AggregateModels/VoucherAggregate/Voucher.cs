@@ -32,7 +32,7 @@ public class Voucher : Entity, IAggregateRoot {
         string code = GenerateVoucherCode();
         var voucher = new RedeemVoucher(
             playerId, Id, eventId,
-            code, DateTime.Now.AddDays(ExpireDate)
+            code, DateTime.UtcNow.AddDays(ExpireDate)
         );
         return voucher;
     }

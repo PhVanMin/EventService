@@ -92,7 +92,7 @@ public class Event : Entity, IAggregateRoot {
     public void AddPlayer(string name, string email) {
         var eventPlayer = _players.FirstOrDefault(v => v.Player.Email == email);
         if (eventPlayer != null)
-            eventPlayer.Player.LastAccessed = DateTime.Now;
+            eventPlayer.Player.LastAccessed = DateTime.UtcNow;
         else {
             var player = new Player(name, email);
             _players.Add(new EventPlayer { EventId = Id, Player = player });
