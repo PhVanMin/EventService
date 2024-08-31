@@ -9,11 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace EventService.API.Controllers {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class EventsController : ControllerBase {
-        private readonly EventContext _context;
+        private readonly EventDbContext _context;
         private readonly EventAPIService _services;
-        public EventsController(EventContext context, EventAPIService services) {
+        public EventsController(EventDbContext context, EventAPIService services) {
             _context = context;
             _services = services;
         }
@@ -38,14 +37,6 @@ namespace EventService.API.Controllers {
 
             var updateBrandEventOrder = new IdentifiedCommand<UpdateEventCommand, bool>(command, Guid.NewGuid());
 
-            _services.Logger.LogInformation(
-                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
-                updateBrandEventOrder.GetType().Name,
-                nameof(updateBrandEventOrder.Id),
-                updateBrandEventOrder.Id,
-                updateBrandEventOrder
-            );
-
             var result = await _services.Mediator.Send(updateBrandEventOrder);
 
             if (result) {
@@ -60,14 +51,6 @@ namespace EventService.API.Controllers {
         [HttpPost]
         public async Task<IActionResult> RegisterEventForBrand(CreateEventCommand command) {
             var createEventOrder = new IdentifiedCommand<CreateEventCommand, bool>(command, Guid.NewGuid());
-
-            _services.Logger.LogInformation(
-                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
-                createEventOrder.GetType().Name,
-                nameof(createEventOrder.Id),
-                createEventOrder.Id,
-                createEventOrder
-            );
 
             var result = await _services.Mediator.Send(createEventOrder);
 
@@ -87,50 +70,6 @@ namespace EventService.API.Controllers {
                 return Ok(vouchers);
             } catch {
                 return NotFound();
-            }
-        }
-
-        [HttpPost("{id}/Redeem")]
-        public async Task<IActionResult> CreateRedeemVoucher(int id, CreateRedeemVoucherCommand command) {
-            var createRedeemVoucherOrder = new IdentifiedCommand<CreateRedeemVoucherCommand, RedeemVoucherVM?>(command, Guid.NewGuid());
-
-            _services.Logger.LogInformation(
-                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
-                createRedeemVoucherOrder.GetType().Name,
-                nameof(createRedeemVoucherOrder.Id),
-                createRedeemVoucherOrder.Id,
-                createRedeemVoucherOrder
-            );
-
-            var result = await _services.Mediator.Send(createRedeemVoucherOrder);
-            if (result != null) {
-                _services.Logger.LogInformation("CreateRedeemVoucherCommand succeeded");
-                return Ok(result);
-            } else {
-                _services.Logger.LogWarning("CreateRedeemVoucherCommand failed");
-                return BadRequest();
-            }
-        }
-
-        [HttpPut("{id}/Redeem")]
-        public async Task<IActionResult> RedeemVoucher(int id, RedeemVoucherCommand command) {
-            var redeemVoucherOrder = new IdentifiedCommand<RedeemVoucherCommand, bool>(command, Guid.NewGuid());
-
-            _services.Logger.LogInformation(
-                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
-                redeemVoucherOrder.GetType().Name,
-                nameof(redeemVoucherOrder.Id),
-                redeemVoucherOrder.Id,
-                redeemVoucherOrder
-            );
-
-            var result = await _services.Mediator.Send(redeemVoucherOrder);
-            if (result) {
-                _services.Logger.LogInformation("RedeemVoucherCommand succeeded");
-                return Ok();
-            } else {
-                _services.Logger.LogWarning("RedeemVoucherCommand failed");
-                return BadRequest();
             }
         }
 

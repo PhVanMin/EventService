@@ -1,7 +1,5 @@
 ﻿using EventService.Domain.AggregateModels.BrandAggregate;
-using EventService.Domain.AggregateModels.GameAggregate;
 using EventService.Domain.AggregateModels.PlayerAggregate;
-using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Domain.Events;
 using EventService.Domain.Exceptions;
 using EventService.Domain.Interfaces;
@@ -19,24 +17,18 @@ public class Event : Entity, IAggregateRoot {
     public int BrandId { get; set; }
     public Brand Brand { get; set; } = null!;
     public int? GameId { get; set; }
-    public Game? Game { get; set; }
 
-    private List<EventVoucher> _vouchers;
+    private List<EventVoucher> _vouchers = [];
     public IReadOnlyCollection<EventVoucher> Vouchers => _vouchers.AsReadOnly();
 
-    private List<EventPlayer> _players;
+    private List<EventPlayer> _players = [];
     public IReadOnlyCollection<EventPlayer> Players => _players.AsReadOnly();
 
-    private List<RedeemVoucher> _redeemVouchers;
-    public IReadOnlyCollection<RedeemVoucher> RedeemVouchers => _redeemVouchers.AsReadOnly();
-
     public Event() {
-        _redeemVouchers = new List<RedeemVoucher>();
-        _vouchers = new List<EventVoucher>();
-        _players = new List<EventPlayer>();
+
     }
 
-    public void Update(string name, string image, int noVoucher, DateTime start, DateTime end, int gameId, List<int> voucherIds) {
+    public Event(string name, string image, int noVoucher, DateTime start, DateTime end, int? gameId, List<int> voucherIds) {
         Name = name;
         Image = image;
         NoVoucher = noVoucher;
@@ -44,9 +36,26 @@ public class Event : Entity, IAggregateRoot {
         EndDate = end;
         GameId = gameId;
 
+        if (gameId != null) {
+            AddDomainEvent(new EventGameRegisteredOrUpdateDomainEvent(this, gameId.Value));
+        }
+
+        AddDomainEvent(new EventStartDomainEvent(this));
+    }
+
+    public void Update(string name, string image, int noVoucher, DateTime start, DateTime end, int? gameId) {
+        Name = name;
+        Image = image;
+        NoVoucher = noVoucher;
+        StartDate = start;
+        EndDate = end;
+
+        if (gameId != null && gameId != GameId) {
+            GameId = gameId;
+            AddDomainEvent(new EventGameRegisteredOrUpdateDomainEvent(this, gameId.Value));
+        }
+
         _vouchers.Clear();
-        foreach (var voucherId in voucherIds)
-            AddVoucher(voucherId);
     }
 
     public void AddVoucher(int voucherId) {
@@ -60,35 +69,6 @@ public class Event : Entity, IAggregateRoot {
         });
     }
 
-    public RedeemVoucher AddRedeemVoucher(int playerId, int voucherId) {
-        if (RedeemVoucherCount >= NoVoucher) {
-            throw new EventDomainException($"Cannot create more than {NoVoucher} vouchers.");
-        }
-
-        RedeemVoucherCount += 1;
-        if (RedeemVoucherCount == NoVoucher) {
-            AddDomainEvent(new EventVoucherUsedUpDomainEvent(Id));
-        }
-
-        var eventVoucher = _vouchers.FirstOrDefault(v => v.VoucherId == voucherId);
-        if (eventVoucher == null) {
-            throw new EventDomainException("Voucher does not exist.");
-        }
-
-        var redeemVoucher = eventVoucher.Voucher.GenerateRedeemVoucher(playerId, Id);
-        _redeemVouchers.Add(redeemVoucher);
-        return redeemVoucher;
-    }
-
-    public void RedeemVoucher(int redeemVoucherId, string code) {
-        var redeemVoucher = _redeemVouchers.FirstOrDefault(rv => rv.Id == redeemVoucherId);
-        if (redeemVoucher == null) {
-            throw new EventDomainException("Voucher does not exists.");
-        }
-
-        redeemVoucher.VerifyAndRedeem(code);
-    }
-    
     public void AddPlayer(string name, string email) {
         var eventPlayer = _players.FirstOrDefault(v => v.Player.Email == email);
         if (eventPlayer != null)
@@ -97,5 +77,15 @@ public class Event : Entity, IAggregateRoot {
             var player = new Player(name, email);
             _players.Add(new EventPlayer { EventId = Id, Player = player });
         }
+    }
+
+    public void IncrementRedeemVoucherCount() {
+        if (RedeemVoucherCount >= NoVoucher)
+            throw new EventDomainException("Vouchers are used up.");
+
+        if (RedeemVoucherCount == NoVoucher - 1)
+            AddDomainEvent(new EventVoucherUsedUpOrEndDomainEvent(Id));
+
+        RedeemVoucherCount += 1;
     }
 }

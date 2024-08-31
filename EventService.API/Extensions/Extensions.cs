@@ -1,5 +1,6 @@
 ﻿using EventService.API.Application.Behaviors;
 using EventService.API.Application.Queries;
+using EventService.API.Application.ScheduleJob;
 using EventService.API.Controllers;
 using EventService.Infrastructure;
 using EventService.Infrastructure.Idempotency;
@@ -7,6 +8,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Quartz;
+using Quartz.Simpl;
 using System.Text;
 
 namespace EventService.API.Extensions {
@@ -25,7 +28,7 @@ namespace EventService.API.Extensions {
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddDbContext<EventContext>(
+            builder.Services.AddDbContext<EventDbContext>(
                 options => options.UseNpgsql(builder.Configuration.GetConnectionString("database")
             ));
 
@@ -61,6 +64,12 @@ namespace EventService.API.Extensions {
                         .AllowAnyHeader()
                         .AllowAnyMethod());
             });
+
+            builder.Services.AddQuartz(q => {
+                q.UseJobFactory<MicrosoftDependencyInjectionJobFactory>();
+                q.AddJob<NotifyEventStart>(opt => opt.WithIdentity(nameof(NotifyEventStart)).StoreDurably());
+            });
+            builder.Services.AddQuartzHostedService();
         }
 
         public static void ConfigurateLogging(this IHostApplicationBuilder builder) {

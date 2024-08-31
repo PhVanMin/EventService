@@ -2,9 +2,9 @@
 
 namespace EventService.Infrastructure.Idempotency {
     public class RequestManager : IRequestManager {
-        private readonly EventContext _context;
+        private readonly EventDbContext _context;
 
-        public RequestManager(EventContext context) {
+        public RequestManager(EventDbContext context) {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 

@@ -7,11 +7,11 @@ namespace EventService.API.Application.Commands.EventCommands
 {
     public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, bool>
     {
-        private readonly EventContext _context;
+        private readonly EventDbContext _context;
         private readonly ILogger<CreateEventCommandHandler> _logger;
         private readonly IMediator _mediator;
         public CreateEventCommandHandler(IMediator mediator,
-            EventContext context,
+            EventDbContext context,
             ILogger<CreateEventCommandHandler> logger)
         {
             _context = context;

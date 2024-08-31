@@ -8,11 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace EventService.API.Controllers {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class BrandsController : ControllerBase {
-        private readonly EventContext _context;
+        private readonly EventDbContext _context;
         private readonly EventAPIService _services;
-        public BrandsController(EventContext context, EventAPIService services) {
+        public BrandsController(EventDbContext context, EventAPIService services) {
             _context = context;
             _services = services;
         }
@@ -63,14 +62,6 @@ namespace EventService.API.Controllers {
 
             var updateBrandOrder = new IdentifiedCommand<UpdateBrandCommand, bool>(command, Guid.NewGuid());
 
-            _services.Logger.LogInformation(
-                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
-                updateBrandOrder.GetType().Name,
-                nameof(updateBrandOrder.Id),
-                updateBrandOrder.Id,
-                updateBrandOrder
-            );
-
             var result = await _services.Mediator.Send(updateBrandOrder);
 
             if (result) {
@@ -85,15 +76,6 @@ namespace EventService.API.Controllers {
         [HttpPost]
         public async Task<IActionResult> CreateBrand(CreateBrandCommand command) {
             var createBrandOrder = new IdentifiedCommand<CreateBrandCommand, bool>(command, Guid.NewGuid());
-
-            _services.Logger.LogInformation(
-                "Sending command: {CommandName} - {IdProperty}: {CommandId} ({@Command})",
-                createBrandOrder.GetType().Name,
-                nameof(createBrandOrder.Id),
-                createBrandOrder.Id,
-                createBrandOrder
-            );
-
             var result = await _services.Mediator.Send(createBrandOrder);
 
             if (result) {

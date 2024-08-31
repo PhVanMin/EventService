@@ -5,11 +5,11 @@ using MediatR;
 
 namespace EventService.API.Application.Commands.VoucherCommands {
     public class CreateVoucherCommandHanlder : IRequestHandler<CreateVoucherCommand, bool> {
-        private readonly EventContext _context;
+        private readonly EventDbContext _context;
         private readonly ILogger<CreateVoucherCommandHanlder> _logger;
         private readonly IMediator _mediator;
         public CreateVoucherCommandHanlder(IMediator mediator,
-            EventContext context,
+            EventDbContext context,
             ILogger<CreateVoucherCommandHanlder> logger) {
             _context = context;
             _logger = logger;

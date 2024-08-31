@@ -1,7 +1,7 @@
 ﻿using MediatR;
 
 namespace EventService.Domain.Events {
-    public record EventVoucherUsedUpDomainEvent(
+    public record EventVoucherUsedUpOrEndDomainEvent(
         int eventId
     ) : INotification;
 }

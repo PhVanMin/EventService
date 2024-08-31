@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventService.API.Application.Commands.EventCommands {
     public class UpdateEventCommandHanlder : IRequestHandler<UpdateEventCommand, bool> {
-        private readonly EventContext _context;
+        private readonly EventDbContext _context;
         private readonly ILogger<UpdateEventCommandHanlder> _logger;
         private readonly IMediator _mediator;
         public UpdateEventCommandHanlder(IMediator mediator,
-            EventContext context,
+            EventDbContext context,
             ILogger<UpdateEventCommandHanlder> logger) {
             _context = context;
             _logger = logger;
@@ -30,7 +30,11 @@ namespace EventService.API.Application.Commands.EventCommands {
             @event.Update(
                 request.name, request.image,
                 request.noVoucher, request.start,
-                request.end, request.gameId, request.voucherIds);
+                request.end, request.gameId);
+
+            foreach (var id in request.voucherIds) {
+                @event.AddVoucher(id);
+            }
 
             return await _context.SaveEntitiesAsync(cancellationToken);
         }

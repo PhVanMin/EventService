@@ -3,7 +3,7 @@ using MediatR;
 
 namespace EventService.Infrastructure {
     static class MediatorExtension {
-        public static async Task DispatchDomainEventsAsync(this IMediator mediator, EventContext ctx) {
+        public static async Task DispatchDomainEventsAsync(this IMediator mediator, EventDbContext ctx) {
             var domainEntities = ctx.ChangeTracker
                 .Entries<Entity>()
                 .Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any());

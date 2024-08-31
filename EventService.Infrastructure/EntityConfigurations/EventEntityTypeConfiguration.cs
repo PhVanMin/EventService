@@ -25,10 +25,6 @@ namespace EventService.Infrastructure.EntityConfigurations
             builder.HasOne(e => e.Brand)
                 .WithMany(e => e.Events)
                 .HasForeignKey(e => e.BrandId);
-
-            builder.HasOne(e => e.Game)
-                .WithMany()
-                .HasForeignKey(e => e.GameId);
         }
     }
 }

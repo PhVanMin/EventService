@@ -2,10 +2,15 @@
 using Microsoft.EntityFrameworkCore;
 
 namespace EventService.API.Application.Queries {
-    public class EventQueries(EventContext context) : IEventQueries {
+    public class EventQueries(EventDbContext context) : IEventQueries {
         public async Task<IEnumerable<EventVM>> GetBrandEvent(int id) {
-            return await context.Events
-                .Where(e => e.BrandId == id)
+            var brand = await context.Brands
+                .Include(b => b.Events)
+                .FirstOrDefaultAsync(b => b.Id == id);
+            if (brand == null)
+                throw new KeyNotFoundException();
+
+            return brand.Events
                 .Select(e => new EventVM {
                     Id = e.Id,
                     Name = e.Name,
@@ -15,7 +20,7 @@ namespace EventService.API.Application.Queries {
                     NoVoucher = e.NoVoucher,
                     StartDate = e.StartDate,
                 })
-                .ToListAsync();
+                .ToList();
         }
 
         public async Task<BrandVM> GetBrand(int id) {
@@ -36,7 +41,13 @@ namespace EventService.API.Application.Queries {
         }
 
         public async Task<IEnumerable<VoucherVM>> GetBrandVoucher(int id) {
-            return await context.Vouchers
+            var brand = await context.Brands.Include(b => b.Vouchers)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (brand == null)
+                throw new KeyNotFoundException();
+
+            return brand.Vouchers
                 .Where(v => v.BrandId == id)
                 .Select(e => new VoucherVM {
                     Id = e.Id,
@@ -46,7 +57,7 @@ namespace EventService.API.Application.Queries {
                     ExpireDate = e.ExpireDate,
                     Status = e.Status
                 })
-                .ToListAsync();
+                .ToList();
         }
 
         public async Task<IEnumerable<VoucherVM>> GetEventVoucher(int id) {
@@ -63,7 +74,7 @@ namespace EventService.API.Application.Queries {
         }
 
         public async Task<EventWithVoucherVM> GetEventWithVoucher(int id) {
-            var @event = await context.Events.Include(e => e.Vouchers).FirstOrDefaultAsync(e => e.Id == id);
+            var @event = await context.Events.Include(e => e.Vouchers).ThenInclude(ev => ev.Voucher).FirstOrDefaultAsync(e => e.Id == id);
             if (@event == null)
                 throw new KeyNotFoundException();
 
@@ -86,20 +97,6 @@ namespace EventService.API.Application.Queries {
             };
         }
 
-        public async Task<IEnumerable<RedeemVoucherVM>> GetBrandRedeemVoucher(int id) {
-            return await context.RedeemVouchers
-                .Where(e => e.Event.BrandId == id)
-                .Select(e => new RedeemVoucherVM {
-                    Id = e.Id,
-                    Image = e.BaseVoucher.Image,
-                    Description = e.BaseVoucher.Description,
-                    ExpireDate = e.ExpireDate,
-                    RedeemCode = e.RedeemCode,
-                    RedeemTime = e.RedeemTime,
-                    Value = e.BaseVoucher.Value
-                }).ToListAsync();
-        }
-
         public async Task<IEnumerable<PlayerVM>> GetBrandPlayer(int id) {
             return await context.EventPlayer
                 .Where(e => e.Event.BrandId == id)
@@ -119,20 +116,6 @@ namespace EventService.API.Application.Queries {
                 }).ToListAsync();
         }
 
-        public async Task<IEnumerable<RedeemVoucherVM>> GetEventRedeemVoucher(int id) {
-            return await context.RedeemVouchers
-                .Where(e => e.EventId == id)
-                .Select(e => new RedeemVoucherVM {
-                    Id = e.Id,
-                    Image = e.BaseVoucher.Image,
-                    Description = e.BaseVoucher.Description,
-                    ExpireDate = e.ExpireDate,
-                    RedeemCode = e.RedeemCode,
-                    RedeemTime = e.RedeemTime,
-                    Value = e.BaseVoucher.Value
-                }).ToListAsync();
-        }
-
         public async Task<IEnumerable<PlayerVM>> GetEventPlayer(int id) {
             return await context.EventPlayer
                 .Where(e => e.EventId == id)
@@ -142,14 +125,20 @@ namespace EventService.API.Application.Queries {
                 }).ToListAsync();
         }
 
-        public async Task<IEnumerable<GameVM>> GetGame() {
-            return await context.Games
-                .Select(e => new GameVM {
-                    Id = e.Id,
-                    Name = e.Name,
-                    Image = e.Image,
-                })
-                .ToListAsync();
+        public async Task<VoucherVM> GetVoucher(int id) {
+            var voucher =  await context.Vouchers.FirstOrDefaultAsync(v => v.Id == id);
+            if (voucher == null) {
+                throw new KeyNotFoundException();
+            }
+
+            return new VoucherVM {
+                Id = id,
+                Image = voucher.Image,
+                Value = voucher.Value,
+                Description = voucher.Description,
+                ExpireDate = voucher.ExpireDate,
+                Status = voucher.Status,
+            };
         }
     }
 }

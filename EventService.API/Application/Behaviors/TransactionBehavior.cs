@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 public class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse> {
     private readonly ILogger<TransactionBehavior<TRequest, TResponse>> _logger;
-    private readonly EventContext _dbContext;
+    private readonly EventDbContext _dbContext;
 
-    public TransactionBehavior(EventContext dbContext,
+    public TransactionBehavior(EventDbContext dbContext,
         ILogger<TransactionBehavior<TRequest, TResponse>> logger) {
-        _dbContext = dbContext ?? throw new ArgumentException(nameof(EventContext));
+        _dbContext = dbContext ?? throw new ArgumentException(nameof(EventDbContext));
         _logger = logger ?? throw new ArgumentException(nameof(ILogger));
     }
 

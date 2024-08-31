@@ -34,14 +34,7 @@ public class Brand : Entity, IAggregateRoot {
     }
 
     public void AddEvent(string name, string image, int noVoucher, DateTime start, DateTime end, int? gameId, List<int> voucherIds) {
-        var @event = new Event() {
-            Name = name,
-            Image = image,
-            NoVoucher = noVoucher,
-            StartDate = start,
-            EndDate = end,
-            GameId = gameId,
-        };
+        var @event = new Event(name, image, noVoucher, start, end, gameId, voucherIds);
 
         foreach (var voucherId in voucherIds) {
             @event.AddVoucher(voucherId);

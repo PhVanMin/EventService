@@ -5,24 +5,25 @@
 namespace EventService.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class FixModel : Migration
+    public partial class Update_1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "CreatedDate",
-                table: "voucher",
-                newName: "created_date");
+            migrationBuilder.DropColumn(
+                name: "code",
+                table: "voucher");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "created_date",
+            migrationBuilder.AddColumn<string>(
+                name: "code",
                 table: "voucher",
-                newName: "CreatedDate");
+                type: "text",
+                nullable: false,
+                defaultValue: "");
         }
     }
 }

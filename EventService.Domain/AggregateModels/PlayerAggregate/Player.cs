@@ -9,12 +9,10 @@ namespace EventService.Domain.AggregateModels.PlayerAggregate
         public string Email { get; set; } = null!;
         public DateTime LastAccessed { get; set; }
 
-        private List<EventPlayer> _events;
+        private List<EventPlayer> _events = [];
         public IReadOnlyCollection<EventPlayer> Events => _events.AsReadOnly();
-        public Player() { 
-            _events = new List<EventPlayer>();
-        }
-        public Player(string name, string email) : this() {
+
+        public Player(string name, string email) {
             Name = name;
             Email = email;
             LastAccessed = DateTime.UtcNow;

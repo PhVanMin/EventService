@@ -5,11 +5,11 @@ using MediatR;
 
 namespace EventService.API.Application.Commands.BrandCommands {
     public class CreateBrandCommandHanlder : IRequestHandler<CreateBrandCommand, bool> {
-        private readonly EventContext _context;
+        private readonly EventDbContext _context;
         private readonly ILogger<CreateBrandCommandHanlder> _logger;
         private readonly IMediator _mediator;
         public CreateBrandCommandHanlder(IMediator mediator,
-            EventContext context,
+            EventDbContext context,
             ILogger<CreateBrandCommandHanlder> logger) {
             _context = context;
             _logger = logger;

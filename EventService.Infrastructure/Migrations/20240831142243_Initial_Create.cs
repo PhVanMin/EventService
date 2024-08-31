@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventService.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class add : Migration
+    public partial class Initial_Create : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,20 +27,6 @@ namespace EventService.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("brand_pkey", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "game",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    name = table.Column<string>(type: "text", nullable: false),
-                    image = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("game_pkey", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -72,32 +58,6 @@ namespace EventService.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "voucher",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    VerifyKey = table.Column<string>(type: "text", nullable: false),
-                    image = table.Column<string>(type: "text", nullable: false),
-                    value = table.Column<int>(type: "integer", nullable: false),
-                    description = table.Column<string>(type: "text", nullable: false),
-                    expire_date = table.Column<int>(type: "integer", nullable: false),
-                    status = table.Column<int>(type: "integer", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    brand_id = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("voucher_pkey", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_voucher_brand_brand_id",
-                        column: x => x.brand_id,
-                        principalTable: "brand",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "event",
                 columns: table => new
                 {
@@ -106,6 +66,7 @@ namespace EventService.Infrastructure.Migrations
                     name = table.Column<string>(type: "text", nullable: false),
                     image = table.Column<string>(type: "text", nullable: false),
                     no_voucher = table.Column<int>(type: "integer", nullable: false),
+                    RedeemVoucherCount = table.Column<int>(type: "integer", nullable: false),
                     start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     brand_id = table.Column<int>(type: "integer", nullable: false),
@@ -120,38 +81,30 @@ namespace EventService.Infrastructure.Migrations
                         principalTable: "brand",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_event_game_game_id",
-                        column: x => x.game_id,
-                        principalTable: "game",
-                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "redeem_voucher",
+                name: "voucher",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    image = table.Column<string>(type: "text", nullable: false),
                     code = table.Column<string>(type: "text", nullable: false),
-                    expire_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    redeem_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    PlayerId = table.Column<int>(type: "integer", nullable: false),
-                    BaseVoucherId = table.Column<int>(type: "integer", nullable: false)
+                    value = table.Column<int>(type: "integer", nullable: false),
+                    description = table.Column<string>(type: "text", nullable: false),
+                    expire_date = table.Column<int>(type: "integer", nullable: false),
+                    status = table.Column<int>(type: "integer", nullable: false),
+                    created_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    brand_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("redeem_voucher_pkey", x => x.id);
+                    table.PrimaryKey("voucher_pkey", x => x.id);
                     table.ForeignKey(
-                        name: "FK_redeem_voucher_player_PlayerId",
-                        column: x => x.PlayerId,
-                        principalTable: "player",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_redeem_voucher_voucher_BaseVoucherId",
-                        column: x => x.BaseVoucherId,
-                        principalTable: "voucher",
+                        name: "FK_voucher_brand_brand_id",
+                        column: x => x.brand_id,
+                        principalTable: "brand",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -210,11 +163,6 @@ namespace EventService.Infrastructure.Migrations
                 column: "brand_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_event_game_id",
-                table: "event",
-                column: "game_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_event_player_PlayerId",
                 table: "event_player",
                 column: "PlayerId");
@@ -223,16 +171,6 @@ namespace EventService.Infrastructure.Migrations
                 name: "IX_event_voucher_VoucherId",
                 table: "event_voucher",
                 column: "VoucherId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_redeem_voucher_BaseVoucherId",
-                table: "redeem_voucher",
-                column: "BaseVoucherId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_redeem_voucher_PlayerId",
-                table: "redeem_voucher",
-                column: "PlayerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_voucher_brand_id",
@@ -250,22 +188,16 @@ namespace EventService.Infrastructure.Migrations
                 name: "event_voucher");
 
             migrationBuilder.DropTable(
-                name: "redeem_voucher");
-
-            migrationBuilder.DropTable(
                 name: "requests");
-
-            migrationBuilder.DropTable(
-                name: "event");
 
             migrationBuilder.DropTable(
                 name: "player");
 
             migrationBuilder.DropTable(
-                name: "voucher");
+                name: "event");
 
             migrationBuilder.DropTable(
-                name: "game");
+                name: "voucher");
 
             migrationBuilder.DropTable(
                 name: "brand");

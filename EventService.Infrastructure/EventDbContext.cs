@@ -1,6 +1,5 @@
 ﻿using EventService.Domain.AggregateModels.BrandAggregate;
 using EventService.Domain.AggregateModels.EventAggregate;
-using EventService.Domain.AggregateModels.GameAggregate;
 using EventService.Domain.AggregateModels.PlayerAggregate;
 using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Infrastructure.EntityConfigurations;
@@ -12,22 +11,20 @@ using System.Data;
 
 namespace EventService.Infrastructure;
 
-public class EventContext : DbContext {
+public class EventDbContext : DbContext {
     public virtual DbSet<Brand> Brands { get; set; }
     public virtual DbSet<Event> Events { get; set; }
     public virtual DbSet<EventVoucher> EventVoucher { get; set; }
     public virtual DbSet<EventPlayer> EventPlayer { get; set; }
-    public virtual DbSet<Game> Games { get; set; }
     public virtual DbSet<Player> Players { get; set; }
     public virtual DbSet<Voucher> Vouchers { get; set; }
-    public virtual DbSet<RedeemVoucher> RedeemVouchers { get; set; }
 
     private IMediator _mediator;
     private IDbContextTransaction? _currentTransaction;
     public IDbContextTransaction? GetCurrentTransaction() => _currentTransaction;
     public bool HasActiveTransaction => _currentTransaction != null;
 
-    public EventContext(DbContextOptions<EventContext> options, IMediator mediator)
+    public EventDbContext(DbContextOptions<EventDbContext> options, IMediator mediator)
         : base(options) {
         _mediator = mediator;
         Database.Migrate();
@@ -41,47 +38,34 @@ public class EventContext : DbContext {
         return _currentTransaction;
     }
 
-    public async Task CommitTransactionAsync(IDbContextTransaction transaction)
-    {
+    public async Task CommitTransactionAsync(IDbContextTransaction transaction) {
         if (transaction == null) throw new ArgumentNullException(nameof(transaction));
         if (transaction != _currentTransaction) throw new InvalidOperationException($"Transaction {transaction.TransactionId} is not current");
 
-        try
-        {
+        try {
             await SaveChangesAsync();
             await transaction.CommitAsync();
-        }
-        catch
-        {
+        } catch {
             RollbackTransaction();
             throw;
-        }
-        finally
-        {
-            if (_currentTransaction != null)
-            {
+        } finally {
+            if (_currentTransaction != null) {
                 _currentTransaction.Dispose();
                 _currentTransaction = null;
             }
         }
     }
 
-    public void RollbackTransaction()
-    {
-        try
-        {
+    public void RollbackTransaction() {
+        try {
             _currentTransaction?.Rollback();
-        }
-        finally
-        {
-            if (_currentTransaction != null)
-            {
+        } finally {
+            if (_currentTransaction != null) {
                 _currentTransaction.Dispose();
                 _currentTransaction = null;
             }
         }
     }
-
 
     public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default) {
         await _mediator.DispatchDomainEventsAsync(this);
@@ -106,9 +90,7 @@ public class EventContext : DbContext {
         modelBuilder.ApplyConfiguration(new EventEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new EventVoucherConfiguration());
         modelBuilder.ApplyConfiguration(new EventPlayerConfiguration());
-        modelBuilder.ApplyConfiguration(new GameEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new PlayerEntityTypeConfiguration());
-        modelBuilder.ApplyConfiguration(new RedeemVoucherEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
     }
 }
