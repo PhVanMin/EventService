@@ -13,6 +13,7 @@ namespace EventService.Infrastructure.EntityConfigurations
             builder.Property(e => e.Id)
                 .ValueGeneratedOnAdd()
                 .HasColumnName("id");
+            builder.Property(e => e.Code).HasColumnName("code");
             builder.Property(e => e.Description).HasColumnName("description");
             builder.Property(e => e.BrandId).HasColumnName("brand_id");
             builder.Property(e => e.ExpireDate).HasColumnName("expire_date");

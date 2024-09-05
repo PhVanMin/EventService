@@ -18,6 +18,7 @@ public class EventDbContext : DbContext {
     public virtual DbSet<EventPlayer> EventPlayer { get; set; }
     public virtual DbSet<Player> Players { get; set; }
     public virtual DbSet<Voucher> Vouchers { get; set; }
+    public virtual DbSet<RedeemVoucher> RedeemVouchers { get; set; }
 
     private IMediator _mediator;
     private IDbContextTransaction? _currentTransaction;
@@ -92,5 +93,6 @@ public class EventDbContext : DbContext {
         modelBuilder.ApplyConfiguration(new EventPlayerConfiguration());
         modelBuilder.ApplyConfiguration(new PlayerEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new RedeemVoucherEntityTypeConfiguration());
     }
 }

@@ -27,29 +27,36 @@ public class Brand : Entity, IAggregateRoot {
         _vouchers = new List<Voucher>();
     }
 
-    public void Update(string name, string field, short status) {
-        Name = name;
-        Field = field;
-        Status = status;
+    public void Update(string? name, string? field, short? status) {
+        if (name != null) Name = name;
+        if (field != null) Field = field;
+        if (status != null) Status = status.Value;
     }
 
-    public void AddEvent(string name, string image, int noVoucher, DateTime start, DateTime end, int? gameId, List<int> voucherIds) {
-        var @event = new Event(name, image, noVoucher, start, end, gameId, voucherIds);
+    public Event AddEvent(string name, string image, int noVoucher, DateTime start, DateTime end, Guid? gameId, List<int>? voucherIds) {
+        var @event = new Event(name, image, noVoucher, start, end, gameId);
 
-        foreach (var voucherId in voucherIds) {
-            @event.AddVoucher(voucherId);
+        if (voucherIds != null) {
+            foreach (var voucherId in voucherIds) {
+                @event.AddVoucher(voucherId);
+            }
         }
 
         _events.Add(@event);
+
+        return @event;
     }
-    public void AddVoucher(string image, int value, string description, int expireDate, int status) {
-        _vouchers.Add(new Voucher() {
+    public Voucher AddVoucher(string image, int value, string? description, int expireDate, int status) {
+        var voucher = new Voucher() {
             Image = image,
             Value = value,
             Description = description,
             ExpireDate = expireDate,
             Status = status,
             CreatedDate = DateTime.UtcNow,
-        });
+        };
+
+        _vouchers.Add(voucher);
+        return voucher;
     }
 }

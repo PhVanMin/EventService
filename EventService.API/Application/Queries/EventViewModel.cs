@@ -15,7 +15,7 @@
         public int NoVoucher { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public int? GameId { get; set; }
+        public Guid? GameId { get; set; }
     }
 
     public record EventWithVoucherVM {
@@ -25,21 +25,49 @@
         public int NoVoucher { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public int? GameId { get; set; }
-        public List<VoucherVM> Vouchers { get; set; } = new List<VoucherVM>();
+        public Guid? GameId { get; set; }
+        public List<VoucherVM> Vouchers { get; set; } = [];
     }
 
     public record VoucherVM {
         public int Id { get; set; }
         public string Image { get; set; } = null!;
         public int Value { get; set; }
-        public string Description { get; set; } = null!;
+        public string? Description { get; set; }
         public int ExpireDate { get; set; }
         public int Status { get; set; }
     }
 
-    public record PlayerVM {
-        public string Name { get; set; } = null!;
-        public string Email { get; set; } = null!;
+    public record PlayerStatisticsVM {
+        public long Count { get; set; }
+        public long OnlineCount { get; set; }
+    }
+
+    public record RedeemVoucherStatisticsVM {
+        public long Total { get; set; }
+        public long RedeemCount { get; set; }
+        public long TotalValue { get; set; }
+    }
+
+    public record EventWithStatisticsVM {
+        public PlayerStatisticsVM? PlayerData { get; set; }
+        public RedeemVoucherStatisticsVM? RedeemVoucherData { get; set; }
+    }
+
+    public record TopEventsStatisticsVM {
+        public List<EventWithStatisticsVM>? Events { get; set; }
+    }
+
+    public record BrandStatisticsVM {
+        public PlayerStatisticsVM? PlayerData { get; set; }
+        public RedeemVoucherStatisticsVM? RedeemVoucherData { get; set; }
+        public TopEventsStatisticsVM? TopEvents { get; set; }
+        public int EventCount { get; set; }
+    }
+
+    public record RedeemVoucherVM {
+        public int Id { get; set; }
+        public long Value { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }

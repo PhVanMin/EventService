@@ -1,9 +1,6 @@
 ﻿using EventService.API.Application.Commands;
 using EventService.API.Application.Commands.EventCommands;
-using EventService.API.Application.Commands.VoucherCommands;
-using EventService.API.Application.Queries;
 using EventService.Infrastructure;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventService.API.Controllers {
@@ -28,12 +25,11 @@ namespace EventService.API.Controllers {
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBrandEvent(int id, UpdateEventRequest request) {
+        public async Task<IActionResult> UpdateBrandEvent(int id, [FromForm] UpdateEventRequest request) {
             var command = new UpdateEventCommand(
                 request.brandId, id,
-                request.name, request.image,
-                request.noVoucher, request.start,
-                request.end, request.gameId, request.voucherIds);
+                request.name, request.noVoucher, request.start,
+                request.end, request.gameId, request.image, request.voucherIds);
 
             var updateBrandEventOrder = new IdentifiedCommand<UpdateEventCommand, bool>(command, Guid.NewGuid());
 
@@ -49,7 +45,7 @@ namespace EventService.API.Controllers {
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterEventForBrand(CreateEventCommand command) {
+        public async Task<IActionResult> RegisterEventForBrand([FromForm] CreateEventCommand command) {
             var createEventOrder = new IdentifiedCommand<CreateEventCommand, bool>(command, Guid.NewGuid());
 
             var result = await _services.Mediator.Send(createEventOrder);
@@ -75,13 +71,13 @@ namespace EventService.API.Controllers {
 
         public record UpdateEventRequest(
             int brandId,
-            string name,
-            string image,
-            int noVoucher,
-            DateTime start,
-            DateTime end,
-            int gameId,
-            List<int> voucherIds
+            string? name,
+            int? noVoucher,
+            DateTime? start,
+            DateTime? end,
+            Guid? gameId, 
+            IFormFile? image,
+            List<int>? voucherIds
         );
     }
 }

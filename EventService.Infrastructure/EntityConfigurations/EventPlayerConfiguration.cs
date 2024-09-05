@@ -8,6 +8,7 @@ namespace EventService.Infrastructure.EntityConfigurations {
             builder.ToTable("event_player");
 
             builder.HasKey(pe => new { pe.EventId, pe.PlayerId });
+            builder.Property(e => e.LastAccessed).HasColumnName("last_accessed");
 
             builder.HasOne(pe => pe.Event)
                 .WithMany(e => e.Players)

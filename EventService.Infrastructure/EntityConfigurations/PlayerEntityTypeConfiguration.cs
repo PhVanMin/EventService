@@ -12,7 +12,6 @@ namespace EventService.Infrastructure.EntityConfigurations {
             builder.Property(e => e.Id).HasColumnName("id");
             builder.Property(e => e.Name).HasColumnName("name");
             builder.Property(e => e.Email).HasColumnName("email");
-            builder.Property(e => e.LastAccessed).HasColumnName("last_accessed");
         }
     }
 }

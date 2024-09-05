@@ -3,7 +3,6 @@ using System;
 using EventService.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,11 +11,9 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventService.Infrastructure.Migrations
 {
     [DbContext(typeof(EventDbContext))]
-    [Migration("20240831142243_Initial_Create")]
-    partial class Initial_Create
+    partial class EventDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,8 +68,8 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_date");
 
-                    b.Property<int?>("GameId")
-                        .HasColumnType("integer")
+                    b.Property<Guid?>("GameId")
+                        .HasColumnType("uuid")
                         .HasColumnName("game_id");
 
                     b.Property<string>("Image")
@@ -112,6 +109,10 @@ namespace EventService.Infrastructure.Migrations
                     b.Property<int>("PlayerId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("LastAccessed")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_accessed");
+
                     b.HasKey("EventId", "PlayerId");
 
                     b.HasIndex("PlayerId");
@@ -148,10 +149,6 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("email");
 
-                    b.Property<DateTime>("LastAccessed")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_accessed");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
@@ -161,6 +158,37 @@ namespace EventService.Infrastructure.Migrations
                         .HasName("player_pkey");
 
                     b.ToTable("player", (string)null);
+                });
+
+            modelBuilder.Entity("EventService.Domain.AggregateModels.VoucherAggregate.RedeemVoucher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("integer")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
+
+                    b.Property<int>("EventId")
+                        .HasColumnType("integer")
+                        .HasColumnName("event_id");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("integer")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("redeem_pkey");
+
+                    b.ToTable("redeem", (string)null);
                 });
 
             modelBuilder.Entity("EventService.Domain.AggregateModels.VoucherAggregate.Voucher", b =>
@@ -186,7 +214,6 @@ namespace EventService.Infrastructure.Migrations
                         .HasColumnName("created_date");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 

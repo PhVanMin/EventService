@@ -1,4 +1,5 @@
-﻿using EventService.Infrastructure;
+﻿using EventService.API.Controllers;
+using EventService.Infrastructure;
 using EventService.Infrastructure.Idempotency;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,12 +9,15 @@ namespace EventService.API.Application.Commands.EventCommands {
         private readonly EventDbContext _context;
         private readonly ILogger<UpdateEventCommandHanlder> _logger;
         private readonly IMediator _mediator;
+        private readonly AzureClientService _azureClientService;
         public UpdateEventCommandHanlder(IMediator mediator,
             EventDbContext context,
-            ILogger<UpdateEventCommandHanlder> logger) {
+            ILogger<UpdateEventCommandHanlder> logger,
+            AzureClientService azureClientService) {
             _context = context;
             _logger = logger;
             _mediator = mediator;
+            _azureClientService = azureClientService;
         }
 
         public async Task<bool> Handle(UpdateEventCommand request, CancellationToken cancellationToken) {
@@ -25,18 +29,28 @@ namespace EventService.API.Application.Commands.EventCommands {
                 return false;
             }
 
-            _logger.LogInformation("Updating Brand Event - Brand Event: {@Event}", @event);
+            _logger.LogInformation("Updating Brand Event - Brand Event: {@event}", @event);
 
             @event.Update(
-                request.name, request.image,
+                request.name, @event.Image,
                 request.noVoucher, request.start,
                 request.end, request.gameId);
 
-            foreach (var id in request.voucherIds) {
-                @event.AddVoucher(id);
+            if (request.voucherIds != null) {
+                foreach (var id in request.voucherIds) {
+                    @event.AddVoucher(id);
+                }
             }
 
-            return await _context.SaveEntitiesAsync(cancellationToken);
+            var result = await _context.SaveEntitiesAsync(cancellationToken);
+
+            if (request.image != null && request.image.FileName != @event.Image && result != false) {
+                var filePath = await _azureClientService.UploadFileAsync(request.image, cancellationToken);
+                @event.Image = filePath;
+                await _context.SaveEntitiesAsync(cancellationToken);
+            }
+
+            return result;
         }
     }
 

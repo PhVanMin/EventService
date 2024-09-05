@@ -16,7 +16,7 @@ public class Event : Entity, IAggregateRoot {
     public DateTime EndDate { get; set; }
     public int BrandId { get; set; }
     public Brand Brand { get; set; } = null!;
-    public int? GameId { get; set; }
+    public Guid? GameId { get; set; }
 
     private List<EventVoucher> _vouchers = [];
     public IReadOnlyCollection<EventVoucher> Vouchers => _vouchers.AsReadOnly();
@@ -28,31 +28,46 @@ public class Event : Entity, IAggregateRoot {
 
     }
 
-    public Event(string name, string image, int noVoucher, DateTime start, DateTime end, int? gameId, List<int> voucherIds) {
+    public Event(string name, string image, int noVoucher, DateTime start, DateTime end, Guid? gameId) {
+        if (start > end)
+            throw new EventDomainException("Invalid end date");
+
+        if (start < DateTime.UtcNow)
+            throw new EventDomainException("Invalid start date");
+
         Name = name;
         Image = image;
         NoVoucher = noVoucher;
-        StartDate = start;
-        EndDate = end;
+        StartDate = start.ToUniversalTime();
+        EndDate = end.ToUniversalTime();
         GameId = gameId;
 
         if (gameId != null) {
-            AddDomainEvent(new EventGameRegisteredOrUpdateDomainEvent(this, gameId.Value));
+            AddDomainEvent(new EventStartDomainEvent(this));
+            AddDomainEvent(new EventVoucherUsedUpOrEndDomainEvent(this));
         }
-
-        AddDomainEvent(new EventStartDomainEvent(this));
     }
 
-    public void Update(string name, string image, int noVoucher, DateTime start, DateTime end, int? gameId) {
-        Name = name;
-        Image = image;
-        NoVoucher = noVoucher;
-        StartDate = start;
-        EndDate = end;
+    public void Update(string? name, string? image, int? noVoucher, DateTime? start, DateTime? end, Guid? gameId) {
+        if (start > end)
+            throw new EventDomainException("Invalid end date");
 
-        if (gameId != null && gameId != GameId) {
-            GameId = gameId;
-            AddDomainEvent(new EventGameRegisteredOrUpdateDomainEvent(this, gameId.Value));
+        if (start < DateTime.UtcNow)
+            throw new EventDomainException("Invalid start date");
+
+        if (name != null) Name = name;
+        if (image != null) Image = image;
+        if (noVoucher != null) NoVoucher = noVoucher.Value;
+        if (start != null) StartDate = start.Value.ToUniversalTime();
+        if (end != null) EndDate = end.Value.ToUniversalTime();
+
+        if (gameId != null && gameId.Value != GameId) {
+            AddDomainEvent(new EventStartDomainEvent(this));
+            AddDomainEvent(new EventVoucherUsedUpOrEndDomainEvent(this));
+        } else if (GameId != null && start != StartDate) {
+            AddDomainEvent(new EventStartDomainEvent(this));
+        } else if (GameId != null && end != EndDate) {
+            AddDomainEvent(new EventVoucherUsedUpOrEndDomainEvent(this));
         }
 
         _vouchers.Clear();
@@ -72,19 +87,22 @@ public class Event : Entity, IAggregateRoot {
     public void AddPlayer(string name, string email) {
         var eventPlayer = _players.FirstOrDefault(v => v.Player.Email == email);
         if (eventPlayer != null)
-            eventPlayer.Player.LastAccessed = DateTime.UtcNow;
+            eventPlayer.LastAccessed = DateTime.UtcNow;
         else {
             var player = new Player(name, email);
-            _players.Add(new EventPlayer { EventId = Id, Player = player });
+            _players.Add(new EventPlayer { EventId = Id, Player = player, LastAccessed = DateTime.UtcNow });
         }
     }
 
     public void IncrementRedeemVoucherCount() {
+        if (GameId == null)
+            throw new EventDomainException("Event doesn't register a game.");
+
         if (RedeemVoucherCount >= NoVoucher)
             throw new EventDomainException("Vouchers are used up.");
 
         if (RedeemVoucherCount == NoVoucher - 1)
-            AddDomainEvent(new EventVoucherUsedUpOrEndDomainEvent(Id));
+            AddDomainEvent(new EventVoucherUsedUpOrEndDomainEvent(this));
 
         RedeemVoucherCount += 1;
     }

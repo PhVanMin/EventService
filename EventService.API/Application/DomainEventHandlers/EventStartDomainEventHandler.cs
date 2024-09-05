@@ -1,31 +1,43 @@
 ﻿using EventService.API.Application.ScheduleJob;
 using EventService.Domain.Events;
-using EventService.Infrastructure;
 using MediatR;
 using Quartz;
 
 namespace EventService.API.Application.DomainEventHandlers {
     public class EventStartDomainEventHandler : INotificationHandler<EventStartDomainEvent> {
-        private EventDbContext _context;
         private ISchedulerFactory _scheduler;
         private ILogger<EventStartDomainEventHandler> _logger;
 
-        public EventStartDomainEventHandler(EventDbContext context, ISchedulerFactory scheduler, ILogger<EventStartDomainEventHandler> logger) {
-            _context = context;
+        public EventStartDomainEventHandler(ISchedulerFactory scheduler, ILogger<EventStartDomainEventHandler> logger) {
             _logger = logger;
             _scheduler = scheduler;
         }
 
         public async Task Handle(EventStartDomainEvent notification, CancellationToken cancellationToken) {
-            var jobKey = new JobKey(nameof(NotifyEventStart));
-
-            _logger.LogInformation("Handling Domain Event: {@event}", nameof(EventStartDomainEvent));
+            var jobKeyString = nameof(NotifyEventStart) + notification.@event.Id;
+            var jobKey = new JobKey(jobKeyString);
             var scheduler = await _scheduler.GetScheduler();
 
-            if (await scheduler.CheckExists(jobKey)) {
-                DateTime startTime = notification.@event.StartDate < DateTime.UtcNow ? DateTime.UtcNow.AddSeconds(10) : notification.@event.StartDate;
-                await scheduler.TriggerJob(jobKey);
-            }
+            await scheduler.DeleteJob(jobKey, cancellationToken);
+
+            if (notification.@event.GameId == null)
+                throw new Exception("Event does not register a game.");
+
+            var job = JobBuilder
+                .Create<NotifyEventStart>()
+                .WithIdentity(jobKeyString, "DynamicStartGroup")
+                .UsingJobData("message", $"{notification.@event.Id}|{notification.@event.GameId.Value}")
+                .Build();
+
+            DateTime startTime = notification.@event.StartDate > DateTime.UtcNow ? DateTime.UtcNow.AddSeconds(10) : notification.@event.StartDate;
+            var trigger = TriggerBuilder
+                .Create()
+                .WithIdentity($"Trigger-{jobKeyString}", "DynamicStartGroup")
+                .StartAt(startTime)
+                .Build();
+
+            await scheduler.ScheduleJob(job, trigger);
+            _logger.LogInformation("Handling Domain Event: {event} - start at {time} - with message {message}", nameof(EventStartDomainEvent), startTime, $"{notification.@event.Id}|{notification.@event.GameId.Value}");
         }
     }
 }

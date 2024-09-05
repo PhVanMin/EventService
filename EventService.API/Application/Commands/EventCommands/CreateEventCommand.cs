@@ -4,11 +4,11 @@ namespace EventService.API.Application.Commands.EventCommands {
     public record CreateEventCommand(
         int brandId,
         string name,
-        string image,
+        IFormFile image,
         int noVoucher,
         DateTime start,
         DateTime end,
-        int? gameId,
-        List<int> voucherIds
+        Guid? gameId,
+        List<int>? voucherIds
     ) : IRequest<bool>;
 }

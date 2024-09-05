@@ -1,8 +1,6 @@
 ﻿using EventService.API.Application.Commands;
 using EventService.API.Application.Commands.BrandCommands;
-using EventService.API.Application.Queries;
 using EventService.Infrastructure;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventService.API.Controllers {
@@ -17,7 +15,7 @@ namespace EventService.API.Controllers {
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<BrandVM>> GetBrandById(int id) {
+        public async Task<IActionResult> GetBrandById(int id) {
             try {
                 var brand = await _services.Queries.GetBrand(id);
                 return Ok(brand);
@@ -27,7 +25,7 @@ namespace EventService.API.Controllers {
         }
 
         [HttpGet("{id}/Events")]
-        public async Task<ActionResult<IEnumerable<EventVM>>> GetEventsByBrandId(int id) {
+        public async Task<IActionResult> GetEventsByBrandId(int id) {
             try {
                 var events = await _services.Queries.GetBrandEvent(id);
                 return Ok(events);
@@ -37,7 +35,7 @@ namespace EventService.API.Controllers {
         }
 
         [HttpGet("{id}/Vouchers")]
-        public async Task<ActionResult<IEnumerable<VoucherVM>>> GetVouchersByBrandId(int id) {
+        public async Task<IActionResult> GetVouchersByBrandId(int id) {
             try {
                 var vouchers = await _services.Queries.GetBrandVoucher(id);
                 return Ok(vouchers);
@@ -47,16 +45,31 @@ namespace EventService.API.Controllers {
         }
 
         [HttpGet("{id}/Redeem")]
-        public async Task<ActionResult<IEnumerable<VoucherVM>>> GetRedeemVouchersByBrandId(int id) {
+        public async Task<IActionResult> GetRedeemVouchersByBrandId(int id) {
             try {
-                var vouchers = await _services.Queries.GetBrandVoucher(id);
+                var vouchers = await _services.Queries.GetBrandRedeemVoucher(id);
                 return Ok(vouchers);
             } catch {
                 return NotFound();
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpGet("{id}/Statistics")]
+        public async Task<IActionResult> GetBrandStatistics(int id, [FromQuery] bool? all, [FromQuery] DateTime? start, [FromQuery] DateTime? end) {
+            try {
+                if (all == null) all = false;
+                if (start == null) start = DateTime.MinValue;
+                if (end == null) end = DateTime.Now;
+
+                var statistics = await _services.Queries.GetBrandStatisticsByDate(id, all.Value, start.Value, end.Value);
+                return Ok(statistics);
+            } catch (Exception ex) {
+                _services.Logger.LogError(ex.Message);
+                return NotFound();
+            }
+        }
+
+        [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateBrand(int id, UpdateBrandRequest request) {
             var command = new UpdateBrandCommand(id, request.Name, request.Field, request.Status);
 
@@ -88,9 +101,9 @@ namespace EventService.API.Controllers {
         }
 
         public record UpdateBrandRequest(
-            string Name,
-            string Field,
-            short Status
+            string? Name,
+            string? Field,
+            short? Status
         );
     }
 }

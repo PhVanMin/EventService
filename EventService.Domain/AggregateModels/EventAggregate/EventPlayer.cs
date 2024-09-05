@@ -6,5 +6,6 @@ namespace EventService.Domain.AggregateModels.EventAggregate {
         public Event Event { get; set; } = null!;
         public int PlayerId { get; set; }
         public Player Player { get; set; } = null!;
+        public DateTime LastAccessed { get; set; }
     }
 }

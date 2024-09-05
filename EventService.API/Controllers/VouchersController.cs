@@ -1,8 +1,9 @@
 ﻿using EventService.API.Application.Commands;
+using EventService.API.Application.Commands.EventCommands;
 using EventService.API.Application.Commands.VoucherCommands;
 using EventService.API.Application.Queries;
+using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Infrastructure;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventService.API.Controllers {
@@ -16,8 +17,38 @@ namespace EventService.API.Controllers {
             _services = services;
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<VoucherVM>> GetVoucherInfo(int id) {
+            try {
+                var voucher = await _services.Queries.GetVoucher(id);
+                return Ok(voucher);
+            } catch {
+                return NotFound();
+            }
+        }
+
+        [HttpPost("Redeem")]
+        public async Task<IActionResult> RedeemVoucher(AddRedeemVoucherOfEventCommand command) {
+            try {
+                var createVoucherOrder = new IdentifiedCommand<AddRedeemVoucherOfEventCommand, bool>(command, Guid.NewGuid());
+
+                var result = await _services.Mediator.Send(createVoucherOrder);
+
+                if (result) {
+                    _services.Logger.LogInformation("CreateVoucherCommand succeeded");
+                    var code = await _services.Queries.GetEventVoucherCode(command.eventId, command.voucherId);
+                    return Ok(code);
+                } else {
+                    _services.Logger.LogWarning("CreateVoucherCommand failed");
+                    return BadRequest();
+                }
+            } catch {
+                return NotFound();
+            }
+        }
+
         [HttpPost]
-        public async Task<IActionResult> CreateVoucher(CreateVoucherCommand command) {
+        public async Task<IActionResult> CreateVoucher([FromForm] CreateVoucherCommand command) {
             var createVoucherOrder = new IdentifiedCommand<CreateVoucherCommand, bool>(command, Guid.NewGuid());
 
             var result = await _services.Mediator.Send(createVoucherOrder);
@@ -31,10 +62,10 @@ namespace EventService.API.Controllers {
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBrandVoucher(int id, UpdateVoucherRequest request) {
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateBrandVoucher(int id, [FromForm] UpdateVoucherRequest request) {
             var command = new UpdateVoucherCommand(
-                id, request.image, request.description, request.value,
+                id, request.image, request.code,request.description, request.value,
                 request.expireDate, request.status);
 
             var updateVoucherOrder = new IdentifiedCommand<UpdateVoucherCommand, bool>(command, Guid.NewGuid());
@@ -51,11 +82,12 @@ namespace EventService.API.Controllers {
         }
 
         public record UpdateVoucherRequest(
-            string image,
-            int value,
-            string description,
-            int expireDate,
-            int status
+            IFormFile? image,
+            string? code,
+            int? value,
+            string? description,
+            int? expireDate,
+            int? status
         );
     }
 }

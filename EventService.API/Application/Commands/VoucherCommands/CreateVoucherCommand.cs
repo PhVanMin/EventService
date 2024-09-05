@@ -3,9 +3,9 @@
 namespace EventService.API.Application.Commands.VoucherCommands {
     public record CreateVoucherCommand(
         int brandId,
-        string Image,
+        IFormFile Image,
         int Value,
-        string Description,
+        string? Description,
         int ExpireDate,
         int Status
     ) : IRequest<bool>;

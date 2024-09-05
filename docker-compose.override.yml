@@ -10,11 +10,16 @@ services:
       - JWT__Issuer=https://localhost:7371/
       - JWT__Audience=https://localhost:7361/
       - JWT__SigningKey=asjhgreqfetjyukmjhfngdbfvsdarwhetryutiyoiuytrteyrtuioadsfghjhkjghgfdpqerwtegc
+      - AzureStorage__Uri=https://vou.blob.core.windows.net
+      - MessageBroker__Host=amqp://rabbitmq:5672
+      - MessageBroker__Username=guest
+      - MessageBroker__Password=guest
     ports:
       - "7360:7360"
       - "7361:7361"
     depends_on:
       - eventdb
+      - rabbitmq
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -58,3 +63,12 @@ services:
     ports:
       - "1433:1433"
     restart: always
+
+  rabbitmq:
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"  # RabbitMQ port
+      - "15672:15672" # RabbitMQ Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest

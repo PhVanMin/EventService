@@ -7,7 +7,6 @@ namespace EventService.Domain.AggregateModels.PlayerAggregate
     {
         public string Name { get; set; } = null!;
         public string Email { get; set; } = null!;
-        public DateTime LastAccessed { get; set; }
 
         private List<EventPlayer> _events = [];
         public IReadOnlyCollection<EventPlayer> Events => _events.AsReadOnly();
@@ -15,12 +14,6 @@ namespace EventService.Domain.AggregateModels.PlayerAggregate
         public Player(string name, string email) {
             Name = name;
             Email = email;
-            LastAccessed = DateTime.UtcNow;
-        }
-
-        public void UpdateLastAccess()
-        {
-            LastAccessed = DateTime.UtcNow;
         }
     }
 }

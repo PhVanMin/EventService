@@ -1,11 +1,16 @@
-﻿using EventService.API.Application.Behaviors;
+﻿using Azure.Identity;
+using BuildingBlocks.Messaging.MassTransit;
+using EventService.API.Application.Behaviors;
+using EventService.API.Application.IntegrationEvents;
 using EventService.API.Application.Queries;
 using EventService.API.Application.ScheduleJob;
 using EventService.API.Controllers;
 using EventService.Infrastructure;
 using EventService.Infrastructure.Idempotency;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Quartz;
@@ -25,6 +30,8 @@ namespace EventService.API.Extensions {
             builder.Services.AddScoped<IRequestManager, RequestManager>();
             builder.Services.AddScoped<IEventQueries, EventQueries>();
             builder.Services.AddScoped<EventAPIService>();
+            builder.Services.AddScoped<AzureClientService>();
+            builder.Services.AddScoped<IntegrationEventService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -67,9 +74,15 @@ namespace EventService.API.Extensions {
 
             builder.Services.AddQuartz(q => {
                 q.UseJobFactory<MicrosoftDependencyInjectionJobFactory>();
-                q.AddJob<NotifyEventStart>(opt => opt.WithIdentity(nameof(NotifyEventStart)).StoreDurably());
             });
             builder.Services.AddQuartzHostedService();
+
+            builder.Services.AddAzureClients(clientBuilder => {
+                clientBuilder.AddBlobServiceClient(new Uri(builder.Configuration["AzureStorage:Uri"]!));
+                clientBuilder.UseCredential(new DefaultAzureCredential());
+            });
+
+            builder.Services.AddMessageBroker(builder.Configuration, typeof(Program).Assembly);
         }
 
         public static void ConfigurateLogging(this IHostApplicationBuilder builder) {

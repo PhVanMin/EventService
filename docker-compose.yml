@@ -13,6 +13,9 @@ services:
       context: .
       dockerfile: IdentityServer.Api/Dockerfile
 
+  rabbitmq:
+    image: rabbitmq:3-management
+
 volumes:
   eventdb:
   identitydb:

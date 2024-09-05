@@ -6,13 +6,11 @@ namespace EventService.API.Application.Commands.BrandCommands {
     public class UpdateBrandCommandHanlder : IRequestHandler<UpdateBrandCommand, bool> {
         private readonly EventDbContext _context;
         private readonly ILogger<UpdateBrandCommandHanlder> _logger;
-        private readonly IMediator _mediator;
-        public UpdateBrandCommandHanlder(IMediator mediator,
+        public UpdateBrandCommandHanlder(
             EventDbContext context,
             ILogger<UpdateBrandCommandHanlder> logger) {
             _context = context;
             _logger = logger;
-            _mediator = mediator;
         }
 
         public async Task<bool> Handle(UpdateBrandCommand request, CancellationToken cancellationToken) {

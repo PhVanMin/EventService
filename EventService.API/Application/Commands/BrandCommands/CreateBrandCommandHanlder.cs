@@ -7,13 +7,11 @@ namespace EventService.API.Application.Commands.BrandCommands {
     public class CreateBrandCommandHanlder : IRequestHandler<CreateBrandCommand, bool> {
         private readonly EventDbContext _context;
         private readonly ILogger<CreateBrandCommandHanlder> _logger;
-        private readonly IMediator _mediator;
-        public CreateBrandCommandHanlder(IMediator mediator,
+        public CreateBrandCommandHanlder(
             EventDbContext context,
             ILogger<CreateBrandCommandHanlder> logger) {
             _context = context;
             _logger = logger;
-            _mediator = mediator;
         }
 
         public async Task<bool> Handle(CreateBrandCommand request, CancellationToken cancellationToken) {
