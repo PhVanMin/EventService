@@ -88,12 +88,12 @@ namespace EventService.API.Controllers {
 
         [HttpPost]
         public async Task<IActionResult> CreateBrand(CreateBrandCommand command) {
-            var createBrandOrder = new IdentifiedCommand<CreateBrandCommand, bool>(command, Guid.NewGuid());
+            var createBrandOrder = new IdentifiedCommand<CreateBrandCommand, int>(command, Guid.NewGuid());
             var result = await _services.Mediator.Send(createBrandOrder);
 
-            if (result) {
+            if (result != -1) {
                 _services.Logger.LogInformation("CreateBrandCommand succeeded");
-                return NoContent();
+                return Ok(result);
             } else {
                 _services.Logger.LogWarning("CreateBrandCommand failed");
                 return BadRequest();

@@ -122,15 +122,6 @@ namespace EventService.API.Application.Queries {
             };
         }
 
-        public async Task<string> GetEventVoucherCode(int eventId, int voucherId) {
-            var ev = await context.EventVoucher.Include(ev => ev.Voucher).FirstOrDefaultAsync(e => e.EventId == eventId && e.VoucherId == voucherId);
-            if (ev == null) {
-                throw new KeyNotFoundException();
-            }
-
-            return ev.Voucher.Code;
-        }
-
         public async Task<BrandStatisticsVM> GetBrandStatisticsByDate(int id, bool all, DateTime start, DateTime end) {
             var startDate = start.ToUniversalTime();
             var endDate = end.AddDays(1).ToUniversalTime();

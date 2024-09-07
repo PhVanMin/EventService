@@ -1,12 +1,11 @@
-﻿using EventService.Infrastructure.Idempotency;
+﻿using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Infrastructure;
+using EventService.Infrastructure.Idempotency;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using EventService.Domain.AggregateModels.VoucherAggregate;
-using MassTransit.Initializers;
 
 namespace EventService.API.Application.Commands.EventCommands {
-    public class AddRedeemVoucherOfEventCommandHandler : IRequestHandler<AddRedeemVoucherOfEventCommand, bool> {
+    public class AddRedeemVoucherOfEventCommandHandler : IRequestHandler<AddRedeemVoucherOfEventCommand, RedeemVoucherDataVM?> {
         private readonly EventDbContext _context;
         private readonly ILogger<AddRedeemVoucherOfEventCommandHandler> _logger;
         public AddRedeemVoucherOfEventCommandHandler(
@@ -15,35 +14,40 @@ namespace EventService.API.Application.Commands.EventCommands {
             _context = context;
             _logger = logger;
         }
-        public async Task<bool> Handle(AddRedeemVoucherOfEventCommand request, CancellationToken cancellationToken) {
+        public async Task<RedeemVoucherDataVM?> Handle(AddRedeemVoucherOfEventCommand request, CancellationToken cancellationToken) {
             var ev = await _context.EventVoucher
                 .Include(e => e.Voucher)
                 .Include(e => e.Event)
-                .FirstOrDefaultAsync(e => e.EventId == request.eventId && e.VoucherId == request.voucherId)
-                .Select(ev => new {
-                    Event = ev?.Event,
-                    Value = ev?.Voucher.Value
-                });
+                .Where(e => e.EventId == request.eventId)
+                .ToListAsync();
 
-            if (ev.Event == null || ev.Value == null)
-                return false;
+            if (ev == null || ev.Count == 0)
+                return null;
 
-            _logger.LogInformation("Updating Event {id} Redeem Voucher Count to {count}", request.eventId, ev.Event.RedeemVoucherCount + 1);
-            ev.Event.IncrementRedeemVoucherCount();
-            _context.RedeemVouchers.Add(new RedeemVoucher(request.eventId, ev.Event.BrandId, ev.Value.Value));
+            var random = new Random();
+            int randomIndex = random.Next(ev.Count);
+            var randomVoucher = ev[randomIndex];
 
-            return await _context.SaveEntitiesAsync();
+            _logger.LogInformation("Updating Event {id} Redeem Voucher Count to {count}", request.eventId, randomVoucher.Event.RedeemVoucherCount + 1);
+            randomVoucher.Event.IncrementRedeemVoucherCount();
+            _context.RedeemVouchers.Add(new RedeemVoucher(randomVoucher.Event.BrandId, request.eventId, randomVoucher.Voucher.Value));
+
+            await _context.SaveEntitiesAsync();
+            return new RedeemVoucherDataVM(
+                randomVoucher.Voucher.Code, 
+                randomVoucher.Voucher.Id,
+                randomVoucher.Voucher.ExpireDate);
         }
     }
 
-    public class AddRedeemVoucherOfEventIdentifiedCommandHanlder : IdentifiedCommandHandler<AddRedeemVoucherOfEventCommand, bool> {
+    public class AddRedeemVoucherOfEventIdentifiedCommandHanlder : IdentifiedCommandHandler<AddRedeemVoucherOfEventCommand, RedeemVoucherDataVM?> {
         public AddRedeemVoucherOfEventIdentifiedCommandHanlder(IMediator mediator,
             IRequestManager requestManager,
-            ILogger<IdentifiedCommandHandler<AddRedeemVoucherOfEventCommand, bool>> logger)
+            ILogger<IdentifiedCommandHandler<AddRedeemVoucherOfEventCommand, RedeemVoucherDataVM?>> logger)
             : base(mediator, requestManager, logger) { }
 
-        protected override bool CreateResultForDuplicateRequest() {
-            return false;
+        protected override RedeemVoucherDataVM? CreateResultForDuplicateRequest() {
+            return null;
         }
     }
 }

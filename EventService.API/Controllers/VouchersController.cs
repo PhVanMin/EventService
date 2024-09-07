@@ -2,7 +2,6 @@
 using EventService.API.Application.Commands.EventCommands;
 using EventService.API.Application.Commands.VoucherCommands;
 using EventService.API.Application.Queries;
-using EventService.Domain.AggregateModels.VoucherAggregate;
 using EventService.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,14 +29,13 @@ namespace EventService.API.Controllers {
         [HttpPost("Redeem")]
         public async Task<IActionResult> RedeemVoucher(AddRedeemVoucherOfEventCommand command) {
             try {
-                var createVoucherOrder = new IdentifiedCommand<AddRedeemVoucherOfEventCommand, bool>(command, Guid.NewGuid());
+                var createVoucherOrder = new IdentifiedCommand<AddRedeemVoucherOfEventCommand, RedeemVoucherDataVM?>(command, Guid.NewGuid());
 
                 var result = await _services.Mediator.Send(createVoucherOrder);
 
-                if (result) {
+                if (result != null) {
                     _services.Logger.LogInformation("CreateVoucherCommand succeeded");
-                    var code = await _services.Queries.GetEventVoucherCode(command.eventId, command.voucherId);
-                    return Ok(code);
+                    return Ok(result);
                 } else {
                     _services.Logger.LogWarning("CreateVoucherCommand failed");
                     return BadRequest();
@@ -65,7 +63,7 @@ namespace EventService.API.Controllers {
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateBrandVoucher(int id, [FromForm] UpdateVoucherRequest request) {
             var command = new UpdateVoucherCommand(
-                id, request.image, request.code,request.description, request.value,
+                id, request.image, request.code, request.description, request.value,
                 request.expireDate, request.status);
 
             var updateVoucherOrder = new IdentifiedCommand<UpdateVoucherCommand, bool>(command, Guid.NewGuid());

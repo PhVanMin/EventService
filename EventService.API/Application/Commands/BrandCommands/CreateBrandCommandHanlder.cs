@@ -4,7 +4,7 @@ using EventService.Infrastructure.Idempotency;
 using MediatR;
 
 namespace EventService.API.Application.Commands.BrandCommands {
-    public class CreateBrandCommandHanlder : IRequestHandler<CreateBrandCommand, bool> {
+    public class CreateBrandCommandHanlder : IRequestHandler<CreateBrandCommand, int> {
         private readonly EventDbContext _context;
         private readonly ILogger<CreateBrandCommandHanlder> _logger;
         public CreateBrandCommandHanlder(
@@ -14,7 +14,7 @@ namespace EventService.API.Application.Commands.BrandCommands {
             _logger = logger;
         }
 
-        public async Task<bool> Handle(CreateBrandCommand request, CancellationToken cancellationToken) {
+        public async Task<int> Handle(CreateBrandCommand request, CancellationToken cancellationToken) {
             var location = new Location(request.Address, request.Gps);
             var brand = new Brand() {
                 Name = request.Name,
@@ -26,18 +26,19 @@ namespace EventService.API.Application.Commands.BrandCommands {
             _logger.LogInformation("Creating Brand - Brand: {@Brand}", brand);
             _context.Brands.Add(brand);
 
-            return await _context.SaveEntitiesAsync(cancellationToken);
+            var result = await _context.SaveEntitiesAsync(cancellationToken);
+            return result ? brand.Id : -1;
         }
     }
 
-    public class CreateBrandIdentifiedCommandHanlder : IdentifiedCommandHandler<CreateBrandCommand, bool> {
+    public class CreateBrandIdentifiedCommandHanlder : IdentifiedCommandHandler<CreateBrandCommand, int> {
         public CreateBrandIdentifiedCommandHanlder(IMediator mediator,
             IRequestManager requestManager,
-            ILogger<IdentifiedCommandHandler<CreateBrandCommand, bool>> logger)
+            ILogger<IdentifiedCommandHandler<CreateBrandCommand, int>> logger)
         : base(mediator, requestManager, logger) { }
 
-        protected override bool CreateResultForDuplicateRequest() {
-            return false;
+        protected override int CreateResultForDuplicateRequest() {
+            return -1;
         }
     }
 }

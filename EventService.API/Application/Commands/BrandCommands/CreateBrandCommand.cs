@@ -7,5 +7,5 @@ namespace EventService.API.Application.Commands.BrandCommands {
         string Address,
         string Gps,
         int Status
-    ) : IRequest<bool>;
+    ) : IRequest<int>;
 }
