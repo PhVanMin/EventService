@@ -2,7 +2,7 @@ using InventoryService.API.Infrastructure;
 using InventoryService.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace InventoryService.API.Controllers {
@@ -13,17 +13,27 @@ namespace InventoryService.API.Controllers {
         private readonly InventoryDbContext _context;
         private readonly HttpClient _httpClient;
 
-        public UserController(HttpClient httpClient, ILogger<UserController> logger, InventoryDbContext context) {
+        public UserController(ILogger<UserController> logger, InventoryDbContext context) {
             _logger = logger;
             _context = context;
-            _httpClient = httpClient;
+
+            var handler = new HttpClientHandler {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
+            };
+            _httpClient = new HttpClient(handler);
+            _httpClient.BaseAddress = new Uri("https://eventservice.api:7361/");
+            _httpClient.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json")
+            );
         }
 
         [HttpGet("{id}/Pieces")]
         public async Task<ActionResult<IEnumerable<ItemPiece>>> GetUserItemPieces(Guid id) {
             var user = await _context.Users.Include(u => u.ItemPieces).FirstOrDefaultAsync(u => u.Id == id);
             if (user == null) {
-                return BadRequest();
+                user = new User { Id = id };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
             }
 
             return Ok(user.ItemPieces);
@@ -33,7 +43,9 @@ namespace InventoryService.API.Controllers {
         public async Task<ActionResult<IEnumerable<Item>>> GetUserItems(Guid id) {
             var user = await _context.Users.Include(u => u.Items).FirstOrDefaultAsync(u => u.Id == id);
             if (user == null) {
-                return BadRequest();
+                user = new User { Id = id };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
             }
 
             return Ok(user.Items);
@@ -42,8 +54,11 @@ namespace InventoryService.API.Controllers {
         [HttpGet("{id}/Vouchers")]
         public async Task<ActionResult<IEnumerable<Item>>> GetUserVouchers(Guid id) {
             var user = await _context.Users.Include(u => u.Vouchers).FirstOrDefaultAsync(u => u.Id == id);
-            if (user == null)
-                return BadRequest();
+            if (user == null) {
+                user = new User { Id = id };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            } 
 
             return Ok(user.Vouchers);
         }
@@ -77,7 +92,7 @@ namespace InventoryService.API.Controllers {
         }
 
         [HttpPost("{id}/Vouchers")]
-        public async Task<ActionResult<RedeemVoucherVM>> AddVoucherToUserInventory(Guid id, Guid itemId) {
+        public async Task<ActionResult<RedeemVoucherVM>> AddVoucherToUserInventory(Guid id, AddRedeemVoucherRequest request) {
             var user = await _context.Users.Include(u => u.Items).FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null) {
@@ -85,17 +100,13 @@ namespace InventoryService.API.Controllers {
                 _context.Users.Add(user);
             }
 
-            var item = user.Items.FirstOrDefault(u => u.Id == itemId);
+            var item = user.Items.FirstOrDefault(u => u.Id == request.itemId);
             if (item == null)
                 return BadRequest();
 
-            // Get redeem voucher code from random voucher
-            var jsonData = JsonSerializer.Serialize(new {
+            var response = await _httpClient.PostAsJsonAsync("api/Vouchers/Redeem", new {
                 eventId = item.EventId
             });
-
-            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"https://localhost:7361/api/Vouchers/Redeem", content);
             response.EnsureSuccessStatusCode();
 
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -106,13 +117,14 @@ namespace InventoryService.API.Controllers {
             if (redeemVoucherData == null)
                 return BadRequest();
 
-            user.RemoveItem(itemId);
+            user.RemoveItem(request.itemId);
             var voucher = user.AddVoucher(item.EventId, redeemVoucherData.voucherId, redeemVoucherData.code, redeemVoucherData.expireDate);
             await _context.SaveChangesAsync();
             return Ok(new RedeemVoucherVM(voucher.Id, voucher.Code));
         }
 
         public record RedeemVoucherVM(Guid id, string code);
+        public record AddRedeemVoucherRequest(Guid itemId);
         public record AddItemPieceRequest(Guid itemPieceId, Guid itemId, int eventId);
         public record AddItemRequest(Guid itemPieceId, int quantity);
         public record RedeemVoucherData(string code, int voucherId, int expireDate);

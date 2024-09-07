@@ -24,7 +24,7 @@ namespace EventService.API.Application.Commands.VoucherCommands {
             if (request.Image == null)
                 return false;
 
-            var voucher = brand.AddVoucher(string.Empty, request.Value, request.Description, request.ExpireDate, request.Status);
+            var voucher = brand.AddVoucher(string.Empty, request.Code, request.Value, request.Description, request.ExpireDate, request.Status);
             _logger.LogInformation("Creating Voucher for Brand - Voucher: {@voucher}", voucher);
 
             var result = await _context.SaveEntitiesAsync(cancellationToken);

@@ -11,13 +11,15 @@ namespace EventService.API.Controllers {
         }
 
         public async Task<string> UploadFileAsync(IFormFile file, CancellationToken cancellationToken) {
-            BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
-            var id = Guid.NewGuid().ToString();
-            BlobClient blobClient = containerClient.GetBlobClient(id);
+            var blobClient = _blobServiceClient
+                .GetBlobContainerClient(_containerName)
+                .GetBlobClient(Guid.NewGuid().ToString());
+
             _logger.LogInformation("Uploading Image {name} to Azure Storage", file.FileName);
-            await using (var stream = file.OpenReadStream()) {
-                await blobClient.UploadAsync(stream, cancellationToken);
-            }
+
+            await using var stream = file.OpenReadStream();
+            await blobClient.UploadAsync(stream, cancellationToken);
+
             return blobClient.Uri.ToString();
         }
     }

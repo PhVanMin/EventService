@@ -11,6 +11,8 @@ namespace InventoryService.API.Infrastructure.EntityTypeConfigurations {
                 .ValueGeneratedOnAdd()
                 .HasColumnName("id");
             builder.Property(e => e.GameItemId).HasColumnName("item_id");
+            builder.Property(e => e.ItemPieceId).HasColumnName("itemPiece_id");
+            builder.Property(e => e.EventId).HasColumnName("event_id");
         }
     }
 }

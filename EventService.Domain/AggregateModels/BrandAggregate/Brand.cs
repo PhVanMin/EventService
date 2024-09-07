@@ -46,10 +46,11 @@ public class Brand : Entity, IAggregateRoot {
 
         return @event;
     }
-    public Voucher AddVoucher(string image, int value, string? description, int expireDate, int status) {
+    public Voucher AddVoucher(string image, string code, int value, string? description, int expireDate, int status) {
         var voucher = new Voucher() {
             Image = image,
             Value = value,
+            Code = code,
             Description = description,
             ExpireDate = expireDate,
             Status = status,

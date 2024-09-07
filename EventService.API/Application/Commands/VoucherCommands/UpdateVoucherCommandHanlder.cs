@@ -22,15 +22,15 @@ namespace EventService.API.Application.Commands.VoucherCommands {
                 return false;
             }
 
-            voucher.Update(voucher.Image, request.code,request.value, request.description, request.expireDate, request.status);
+            voucher.Update(voucher.Image, request.code, request.value, request.description, request.expireDate, request.status);
             _logger.LogInformation("Update Voucher for Brand - Voucher: {@voucher}", voucher);
 
             var result = await _context.SaveEntitiesAsync(cancellationToken);
 
             if (request.image != null && request.image.FileName != voucher.Image && result != false) {
-                    var filePath = await _azureClientService.UploadFileAsync(request.image, cancellationToken);
-                    voucher.Image = filePath;
-                    await _context.SaveEntitiesAsync(cancellationToken);
+                var filePath = await _azureClientService.UploadFileAsync(request.image, cancellationToken);
+                voucher.Image = filePath;
+                await _context.SaveEntitiesAsync(cancellationToken);
             }
 
             return result;

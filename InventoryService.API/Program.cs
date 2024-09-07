@@ -10,17 +10,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<InventoryDbContext>(
     options => options.UseNpgsql(builder.Configuration.GetConnectionString("database")
 ));
-builder.Services.AddHttpClient();
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowAll",
         builder => builder
-            .AllowAnyOrigin()
+            .AllowAnyOrigin() 
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
 builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,6 +27,7 @@ if (app.Environment.IsDevelopment()) {
     app.UseSwaggerUI();
 }
 
+//app.UseExceptionHandler(opt => { });
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthorization();

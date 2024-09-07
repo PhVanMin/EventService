@@ -191,9 +191,7 @@ namespace EventService.API.Application.Queries {
                     RedeemCount = events.Sum(e => e.RedeemVoucherCount),
                     TotalValue = redeemVouchers.Sum(v => v.Value)
                 },
-                TopEvents = new TopEventsStatisticsVM {
-                    Events = topEvents
-                },
+                TopEvents = topEvents,
                 EventCount = events.Count
             };
         }

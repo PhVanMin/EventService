@@ -54,14 +54,10 @@
         public RedeemVoucherStatisticsVM? RedeemVoucherData { get; set; }
     }
 
-    public record TopEventsStatisticsVM {
-        public List<EventWithStatisticsVM>? Events { get; set; }
-    }
-
     public record BrandStatisticsVM {
         public PlayerStatisticsVM? PlayerData { get; set; }
         public RedeemVoucherStatisticsVM? RedeemVoucherData { get; set; }
-        public TopEventsStatisticsVM? TopEvents { get; set; }
+        public List<EventWithStatisticsVM>? TopEvents { get; set; }
         public int EventCount { get; set; }
     }
 

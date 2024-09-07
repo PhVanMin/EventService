@@ -83,6 +83,7 @@ services:
       - ConnectionStrings__database=Server=postgres;Port=5432;Database=inventory;User Id=postgres;Password=postgres;Include Error Detail=true
     depends_on:
       - eventdb
+      - eventservice.api
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
