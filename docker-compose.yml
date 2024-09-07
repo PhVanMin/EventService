@@ -13,6 +13,12 @@ services:
       context: .
       dockerfile: IdentityServer.Api/Dockerfile
 
+  inventoryservice.api:
+    image: ${DOCKER_REGISTRY-}inventoryserviceapi
+    build:
+      context: .
+      dockerfile: InventoryService.Api/Dockerfile
+
   rabbitmq:
     image: rabbitmq:3-management
 

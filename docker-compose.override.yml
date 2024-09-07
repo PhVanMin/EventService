@@ -71,3 +71,18 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+
+  inventoryservice.api:
+    ports:
+      - "7380:7380"
+      - "7381:7381"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=7380
+      - ASPNETCORE_HTTPS_PORTS=7381
+      - ConnectionStrings__database=Server=postgres;Port=5432;Database=inventory;User Id=postgres;Password=postgres;Include Error Detail=true
+    depends_on:
+      - eventdb
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
