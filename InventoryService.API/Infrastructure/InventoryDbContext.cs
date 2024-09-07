@@ -15,6 +15,7 @@ namespace InventoryService.API.Infrastructure {
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             modelBuilder.ApplyConfiguration(new UserEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ItemEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ItemPiecesEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
         }
     }

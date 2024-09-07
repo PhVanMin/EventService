@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InventoryService.API.Infrastructure.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20240905145034_Update-Model")]
-    partial class UpdateModel
+    [Migration("20240907155029_Create-1")]
+    partial class Create1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,7 +29,8 @@ namespace InventoryService.API.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<int>("EventId")
                         .HasColumnType("integer")
@@ -54,19 +55,30 @@ namespace InventoryService.API.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("EventId")
+                        .HasColumnType("integer")
+                        .HasColumnName("event_id");
+
+                    b.Property<Guid>("GameItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_id");
+
+                    b.Property<Guid>("ItemPieceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("itemPiece_id");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("piece_pkey");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ItemPieces");
+                    b.ToTable("item_piece", (string)null);
                 });
 
             modelBuilder.Entity("InventoryService.API.Models.User", b =>
